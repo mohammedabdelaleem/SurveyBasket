@@ -1,61 +1,72 @@
 ﻿
 
 
-using SurveyBasket.API.Contracts.Requests;
-using SurveyBasket.API.Mapping;
+
+using SurveyBasket.API.Contracts.Responses;
 
 namespace SurveyBasket.API.Controllers;
 [Route("api/[controller]")]
-[ApiController]  
+[ApiController]
 public class PollsController : ControllerBase
 {
 	private readonly IPollService pollService;
 
-	public PollsController(IPollService pollService )
-    {
+	public PollsController(IPollService pollService)
+	{
 		this.pollService = pollService;
 	}
 
 
 
-    [HttpGet("all")]
+	[HttpGet("all")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public ActionResult GetAll()
 	{
 		IEnumerable<Poll> polls = pollService.GetAll();
-		return (polls.Count() == 0 ) ? NotFound(new {
-			message = $"No Poll Yet"}) :Ok(polls.MapToPollsResponse());
+		var response = polls.Adapt<IEnumerable<PollResponse>>();
+
+		return (response.Count() == 0) ? NotFound(new
+		{
+			message = $"No Poll Yet"
+		}) : Ok(response);
 	}
 
 
 
-	[HttpGet("{id:int}")]
+	[HttpGet("{id}")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public ActionResult<Poll> Get([FromRoute]int id)
+	public ActionResult<Poll> Get([FromRoute] int id)
 	{
-		Poll? poll = pollService.Get( id);
-		return poll == null ? NotFound(new { message = $"Poll With {id} Not Found" }) : Ok(poll.MapToPollResponse());
+		Poll? poll = pollService.Get(id);
+
+		if (poll is null)
+			return NotFound(new { message = $"Poll With {id} Not Found" });
+
+		// source.Adapt<destination>()
+		var response = poll.Adapt<PollResponse>();
+		return Ok(response);
 	}
 
 
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
-	public ActionResult Add([FromBody]PollRequest poll)
+	public ActionResult Add([FromBody] PollRequest poll)
 	{
-		 Poll newPoll=  pollService.Add(poll.MappingToPoll());
-		return CreatedAtAction(nameof(Get) , new { id = newPoll.Id } , newPoll);
+		Poll newPoll = pollService.Add(poll.Adapt<Poll>());
+		return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);
+
 	}
 
 
-	[HttpPut("{id:int}")]
+	[HttpPut("{id}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 
 	public ActionResult Update(int id, PollRequest poll)
 	{
-		bool isUpdated = pollService.Update(id, poll.MappingToPoll());
+		bool isUpdated = pollService.Update(id, poll.Adapt<Poll>());
 
 		if (!isUpdated)
 			return NotFound(new { message = $"ERROR : Poll {id} Not Updated" });
@@ -63,11 +74,11 @@ public class PollsController : ControllerBase
 		return NoContent();
 	}
 
-	[HttpDelete("{id:int}")]
+	[HttpDelete("{id}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 
-	public ActionResult Update([FromRoute]int id)
+	public ActionResult Update([FromRoute] int id)
 	{
 		bool isDeleted = pollService.Delete(id);
 
@@ -76,4 +87,8 @@ public class PollsController : ControllerBase
 
 		return NoContent();
 	}
+
+
+	
 }
+

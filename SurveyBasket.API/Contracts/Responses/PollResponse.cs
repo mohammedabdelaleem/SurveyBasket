@@ -1,8 +1,3 @@
 ﻿namespace SurveyBasket.API.Contracts.Responses;
 
-public class PollResponse
-{
-    public int Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-}
+public record PollResponse(int Id , string Title, string Description);
