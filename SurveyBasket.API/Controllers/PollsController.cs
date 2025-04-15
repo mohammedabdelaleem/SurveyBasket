@@ -1,7 +1,4 @@
 ﻿
-
-
-
 using SurveyBasket.API.Contracts.Responses;
 
 namespace SurveyBasket.API.Controllers;
