@@ -1,6 +1,12 @@
 
+
+
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDependencies();
+builder.Services.AddDependencies(builder.Configuration);
+
+
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+	.AddEntityFrameworkStores<AppDbContext>();
 
 var app = builder.Build();
 
@@ -14,7 +20,7 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
+app.MapIdentityApi<ApplicationUser>();
 app.MapControllers();
 
 app.Run();

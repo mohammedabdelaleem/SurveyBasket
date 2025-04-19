@@ -8,13 +8,29 @@ public class PollRequestValidator : AbstractValidator<PollRequest>
 	{
 		RuleFor(x => x.Title)
 			.NotEmpty()
-			.WithMessage("{PropertyName}  Is Required");
+			.Length(3, 100);
 
-		RuleFor(x => x.Description)
+
+		RuleFor(x => x.Summary)
 			.NotEmpty()
-			.WithMessage("{PropertyName}  Is Required")
-			.Length(3,10)
-			.WithMessage("{PropertyName} Should Be At Least {MinLength} characters and Maximum {MaxLength} characters you Enterd {TotalLength}");
+			.Length(3, 1500);
 
+		RuleFor(x=>x.StartsAt)
+			.NotEmpty()
+			.GreaterThanOrEqualTo(DateOnly.FromDateTime(DateTime.Now));
+
+		RuleFor(x => x.EndsAt)
+			.NotEmpty();
+
+		RuleFor(x => x)
+			.Must(HasValidDates)
+			.WithName(nameof(PollRequest.EndsAt))
+			.WithMessage("{PropertyName} Must Greater Than or Equals Start Date");	
+
+	}
+
+	private bool HasValidDates(PollRequest pollRequest)
+	{
+		return pollRequest.StartsAt <= pollRequest.EndsAt;
 	}
 }

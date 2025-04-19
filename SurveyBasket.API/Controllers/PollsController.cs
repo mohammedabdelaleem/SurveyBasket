@@ -1,5 +1,9 @@
 ﻿
-using SurveyBasket.API.Contracts.Responses;
+
+using Azure;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace SurveyBasket.API.Controllers;
 [Route("api/[controller]")]
@@ -16,11 +20,11 @@ public class PollsController : ControllerBase
 
 
 	[HttpGet("all")]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public ActionResult GetAll()
+	public async Task<ActionResult> GetAll(CancellationToken cancellationToken)
 	{
-		IEnumerable<Poll> polls = pollService.GetAll();
+		IEnumerable<Poll> polls = await pollService.GetAllAsync(cancellationToken);
 		var response = polls.Adapt<IEnumerable<PollResponse>>();
 
 		return (response.Count() == 0) ? NotFound(new
@@ -34,9 +38,9 @@ public class PollsController : ControllerBase
 	[HttpGet("{id}")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public ActionResult<Poll> Get([FromRoute] int id)
+	public async Task<ActionResult<Poll>> Get([FromRoute] int id)
 	{
-		Poll? poll = pollService.Get(id);
+		Poll? poll = await pollService.GetAsync(id);
 
 		if (poll is null)
 			return NotFound(new { message = $"Poll With {id} Not Found" });
@@ -49,11 +53,18 @@ public class PollsController : ControllerBase
 
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
-	public ActionResult Add([FromBody] PollRequest poll)
+	public async Task< ActionResult> Add([FromBody] PollRequest poll)
 	{
-		Poll newPoll = pollService.Add(poll.Adapt<Poll>());
-		return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);
+		if (poll is null)
+			return BadRequest(poll);
 
+		//if(poll.id > 0) // id is auto generated
+		//{
+		//	return StatusCode(StatusCodes.Status500InternalServerError);
+		//}
+
+		Poll newPoll = await pollService.AddAsync(poll.Adapt<Poll>());
+		return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);  
 	}
 
 
@@ -61,9 +72,9 @@ public class PollsController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 
-	public ActionResult Update(int id, PollRequest poll)
+	public async Task<ActionResult> Update(int id, PollRequest poll, CancellationToken cancellationToken=default)
 	{
-		bool isUpdated = pollService.Update(id, poll.Adapt<Poll>());
+		bool isUpdated = await pollService.UpdateAsync(id, poll.Adapt<Poll>(), cancellationToken);
 
 		if (!isUpdated)
 			return NotFound(new { message = $"ERROR : Poll {id} Not Updated" });
@@ -71,13 +82,70 @@ public class PollsController : ControllerBase
 		return NoContent();
 	}
 
-	[HttpDelete("{id}")]
+	[HttpPatch("{id}")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	public async Task<ActionResult> PartialUpdate(int id, JsonPatchDocument<PollRequest> patchDTO, CancellationToken cancellationToken = default)
+	{
+		if (patchDTO is null || id == 0)
+		{
+			return BadRequest();
+		}
+
+		// Fetch the existing poll entity
+		var poll = await pollService.GetAsync(id, cancellationToken);
+		if (poll == null)
+		{
+			return NotFound(new { message = $"Poll with ID {id} not found" });
+		}
+
+		// Adapt the entity to a DTO that can be patched
+		var pollToPatch = poll.Adapt<PollRequest>();
+
+		// Apply the patch
+		patchDTO.ApplyTo(pollToPatch, ModelState);
+
+		// Check if the patch resulted in invalid model state
+		if (!ModelState.IsValid)
+		{
+			return BadRequest(ModelState);
+		}
+
+		// Map the patched DTO back to the entity
+		pollToPatch.Adapt(poll);
+
+		// Save changes to the database
+		await pollService.UpdateAsync(id, poll, cancellationToken);
+
+		// Return success with no content
+		return NoContent();
+	}
+
+
+
+	[HttpPut("{id}/togglePublish")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 
-	public ActionResult Update([FromRoute] int id)
+	public async Task<ActionResult> TogglePublish(int id, CancellationToken cancellationToken = default)
 	{
-		bool isDeleted = pollService.Delete(id);
+		bool isUpdated = await pollService.TogglePublishStatusAsync(id,  cancellationToken);
+
+		if (!isUpdated)
+			return NotFound(new { message = $"ERROR : Poll {id} Not Updated" });
+
+		return NoContent();
+	}
+
+
+	[HttpDelete("{id}")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)] 
+
+	public async Task<ActionResult> DeleteAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+	{
+		bool isDeleted = await pollService.DeleteAsync(id, cancellationToken);
 
 		if (!isDeleted)
 			return NotFound(new { message = $"ERROR : Poll {id} Not Deleted" });
@@ -86,6 +154,6 @@ public class PollsController : ControllerBase
 	}
 
 
-	
+
 }
 
