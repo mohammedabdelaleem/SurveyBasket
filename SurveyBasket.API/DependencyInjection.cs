@@ -16,7 +16,7 @@ public static class DependencyInjection
 
 		// Add services to the container.
 		services.AddControllers().AddNewtonsoftJson();
-		services.AddAuthConfig();
+		services.AddAuthConfig(configuration);
 
 
 		services
@@ -77,12 +77,22 @@ public static class DependencyInjection
 	}
 
 
-	private static IServiceCollection AddAuthConfig(this IServiceCollection services)
+	private static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddSingleton<IJWTProvider, JWTProvider>();
 
 		services.AddIdentity<ApplicationUser, IdentityRole>()
 			.AddEntityFrameworkStores<AppDbContext>();
+
+
+		// Configurations 
+		//	services.Configure<JWTOptions>(configuration.GetSection(JWTOptions.SectionName));
+		services.AddOptions<JWTOptions>()
+				.BindConfiguration(JWTOptions.SectionName)
+				.ValidateDataAnnotations()
+				.ValidateOnStart();
+
+		var jwtSettings = configuration.GetSection(JWTOptions.SectionName).Get<JWTOptions>();
 
 		services.AddAuthentication(options =>
 		{
@@ -98,9 +108,9 @@ public static class DependencyInjection
 					ValidateIssuer = true,
 					ValidateAudience = true,
 					ValidateLifetime = true,
-					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("bxCTTfkq3heROwz2wvI5pGo8QmWYkOQB")),
-					ValidIssuer = "SurveyBasket",
-					ValidAudience = "SurveyBasket users"
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings!.Key)),
+					ValidIssuer = jwtSettings.Issuer,
+					ValidAudience = jwtSettings.Audience,
 
 				};
 			});

@@ -6,11 +6,14 @@ using System.Text;
 
 namespace SurveyBasket.API.Authentication;
 
-public class JWTProvider : IJWTProvider
+public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 {
+	private readonly JWTOptions _jwtOptions = jwtOptions.Value;
+	
+
 	public (string token, int expiresIn) GenerateToken(ApplicationUser user)
 	{
-
+		//var jwtSettings = 
 		// Claims Which Needed From Frontend , Card info 
 		Claim[] claims = [
 			
@@ -23,16 +26,16 @@ public class JWTProvider : IJWTProvider
 
 
 		// Key for En/Decoding
-		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("bxCTTfkq3heROwz2wvI5pGo8QmWYkOQB"));
+		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 	
 		var signInCredintials = new SigningCredentials(symmetricSecurityKey,SecurityAlgorithms.HmacSha256);
 
-		var expiresIn = 30;
+		var expiresIn = _jwtOptions.ExpiryMinutes;
 
 
 		var token = new JwtSecurityToken(
-			issuer: "SurveyBasket",   // who exports the token
-			audience: "SurveyBasket users", // who are the users for this token
+			issuer: _jwtOptions.Issuer,   // who exports the token
+			audience: _jwtOptions.Audience, // who are the users for this token
 			claims: claims,
 			expires: DateTime.UtcNow.AddMinutes(expiresIn),
 			signingCredentials: signInCredintials
