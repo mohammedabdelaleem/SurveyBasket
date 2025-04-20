@@ -7,10 +7,9 @@ global using System.Reflection;
 global using Microsoft.AspNetCore.Mvc;
 global using SurveyBasket.API.Entities;
 global using SurveyBasket.API.Services;
-global using SurveyBasket.API.Contracts.Requests;
+global using SurveyBasket.API.Contracts.Poll;
 global using SurveyBasket.API.Persistance;
 global using Microsoft.EntityFrameworkCore;
-global using SurveyBasket.API.Contracts.Responses;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-
+global using SurveyBasket.API.Contracts.Auth;
+global using Microsoft.AspNetCore.Identity;

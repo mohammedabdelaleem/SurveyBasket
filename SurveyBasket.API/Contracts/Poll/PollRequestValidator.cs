@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace SurveyBasket.API.Contracts.Validators;
+namespace SurveyBasket.API.Contracts.Poll;
 
-public class PollRequestValidator : AbstractValidator<PollRequest>
+public class LoginValidator : AbstractValidator<PollRequest>
 {
-	public PollRequestValidator()
+	public LoginValidator()
 	{
 		RuleFor(x => x.Title)
 			.NotEmpty()

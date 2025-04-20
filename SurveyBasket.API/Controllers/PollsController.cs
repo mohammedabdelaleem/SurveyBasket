@@ -1,9 +1,5 @@
-﻿
-
-using Azure;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace SurveyBasket.API.Controllers;
 [Route("api/[controller]")]
@@ -22,6 +18,7 @@ public class PollsController : ControllerBase
 	[HttpGet("all")]
 	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[Authorize]
 	public async Task<ActionResult> GetAll(CancellationToken cancellationToken)
 	{
 		IEnumerable<Poll> polls = await pollService.GetAllAsync(cancellationToken);
@@ -88,37 +85,30 @@ public class PollsController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<ActionResult> PartialUpdate(int id, JsonPatchDocument<PollRequest> patchDTO, CancellationToken cancellationToken = default)
 	{
-		if (patchDTO is null || id == 0)
+		if (patchDTO is null || id <= 0)
 		{
-			return BadRequest();
+			return BadRequest("Invalid patch document or ID.");
 		}
 
-		// Fetch the existing poll entity
 		var poll = await pollService.GetAsync(id, cancellationToken);
 		if (poll == null)
 		{
-			return NotFound(new { message = $"Poll with ID {id} not found" });
+			return NotFound(new { message = $"Poll with {nameof(id)} {id} not found" });
 		}
 
-		// Adapt the entity to a DTO that can be patched
 		var pollToPatch = poll.Adapt<PollRequest>();
 
-		// Apply the patch
 		patchDTO.ApplyTo(pollToPatch, ModelState);
 
-		// Check if the patch resulted in invalid model state
-		if (!ModelState.IsValid)
+		if (!ModelState.IsValid || !TryValidateModel(pollToPatch))
 		{
-			return BadRequest(ModelState);
+			return ValidationProblem(ModelState);
 		}
 
-		// Map the patched DTO back to the entity
-		pollToPatch.Adapt(poll);
+		pollToPatch.Adapt(poll); // Map back patched data to entity
 
-		// Save changes to the database
 		await pollService.UpdateAsync(id, poll, cancellationToken);
 
-		// Return success with no content
 		return NoContent();
 	}
 
