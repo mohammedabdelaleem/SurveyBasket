@@ -43,4 +43,36 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 
 		return (token:new JwtSecurityTokenHandler().WriteToken(token) , expiresIn: expiresIn * 60);
 	}
+
+	public string? ValidateToken(string token)
+	{
+		var tokenHandler = new JwtSecurityTokenHandler();
+
+		// Same Key 
+		// Key for En/Decoding
+		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
+
+		try
+		{
+			tokenHandler.ValidateToken(token, new TokenValidationParameters
+			{
+				IssuerSigningKey = symmetricSecurityKey,
+				ValidateIssuerSigningKey = true,
+				ValidateIssuer = false,
+				ValidateAudience = false,
+				ClockSkew = TimeSpan.Zero, // once the expire time occures , it calculate it as expire don't still 5m
+			}, out SecurityToken validatedToken);
+
+			var jwtToken = (JwtSecurityToken)validatedToken;
+
+			return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
+		}
+		catch 
+		{ 
+		return null;
+		}
+
+
+
+	}
 }
