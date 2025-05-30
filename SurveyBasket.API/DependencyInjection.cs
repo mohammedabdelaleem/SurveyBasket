@@ -94,6 +94,10 @@ public static class DependencyInjection
 
 		var jwtSettings = configuration.GetSection(JWTOptions.SectionName).Get<JWTOptions>();
 
+		// when you need to use [Authorize] with Controller or Endpoint 
+		// you don't need to tell them you use JwtBearer
+		// you just add the configurations here
+		
 		services.AddAuthentication(options =>
 		{
 			options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -101,9 +105,10 @@ public static class DependencyInjection
 		})
 			.AddJwtBearer(options =>
 			{
-				options.SaveToken = true;
+				options.SaveToken = true; // any time during request if you need to reach the token , you can do it easily 
 				options.TokenValidationParameters = new TokenValidationParameters
 				{
+					// more validations more rubost key less hacking 
 					ValidateIssuerSigningKey = true,
 					ValidateIssuer = true,
 					ValidateAudience = true,

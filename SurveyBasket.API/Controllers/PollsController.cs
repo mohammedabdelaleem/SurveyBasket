@@ -62,7 +62,7 @@ public class PollsController : ControllerBase
 
 		Poll newPoll = await pollService.AddAsync(poll.Adapt<Poll>());
 		return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);  
-	}
+	}		
 
 
 	[HttpPut("{id}")]

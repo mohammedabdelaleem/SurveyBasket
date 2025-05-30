@@ -12,7 +12,7 @@ public class ApplicationUserConfigurations : IEntityTypeConfiguration<Applicatio
 			.HasMaxLength(100);
 
 		builder
-			.OwnsMany(x => x.RefreshToken)
+			.OwnsMany(x => x.RefreshTokens)
 			.ToTable("RefreshTokens") // instead of RefreshToken
 			.WithOwner()
 			.HasForeignKey("UserId"); // // instead of ApplicaionUserId

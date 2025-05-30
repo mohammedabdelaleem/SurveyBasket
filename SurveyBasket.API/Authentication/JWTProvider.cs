@@ -13,7 +13,7 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 
 	public (string token, int expiresIn) GenerateToken(ApplicationUser user)
 	{
-		//var jwtSettings = 
+
 		// Claims Which Needed From Frontend , Card info 
 		Claim[] claims = [
 			
@@ -21,21 +21,22 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
 			new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
 			new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // prefer to adding with claims 
 			];
 
 
 		// Key for En/Decoding
 		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 	
+		// Encryption Algorithm
 		var signInCredintials = new SigningCredentials(symmetricSecurityKey,SecurityAlgorithms.HmacSha256);
 
 		var expiresIn = _jwtOptions.ExpiryMinutes;
-
-
+		
+		// information that added with token	
 		var token = new JwtSecurityToken(
-			issuer: _jwtOptions.Issuer,   // who exports the token
-			audience: _jwtOptions.Audience, // who are the users for this token
+			issuer: _jwtOptions.Issuer,   // who exports the token : your auth server [iss and aud are excellent for microservices] 
+			audience: _jwtOptions.Audience, // who are the users for this token : your api 
 			claims: claims,
 			expires: DateTime.UtcNow.AddMinutes(expiresIn),
 			signingCredentials: signInCredintials
@@ -44,11 +45,12 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 		return (token:new JwtSecurityTokenHandler().WriteToken(token) , expiresIn: expiresIn * 60);
 	}
 
+	// validate and retutn the user id if token is ok 
 	public string? ValidateToken(string token)
 	{
 		var tokenHandler = new JwtSecurityTokenHandler();
 
-		// Same Key 
+		// Same Key : which we are used for Encryption , now we need to use it with Decryption
 		// Key for En/Decoding
 		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 
@@ -63,7 +65,10 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 				ClockSkew = TimeSpan.Zero, // once the expire time occures , it calculate it as expire don't still 5m
 			}, out SecurityToken validatedToken);
 
+			
 			var jwtToken = (JwtSecurityToken)validatedToken;
+			//now we have the access (jwt) token with its claims
+			// we need to return the userId , to use it later and credintial the current user
 
 			return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
 		}
