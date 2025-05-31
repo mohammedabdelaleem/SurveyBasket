@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 namespace SurveyBasket.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class PollsController : ControllerBase
 {
 	private readonly IPollService pollService;
@@ -18,7 +19,6 @@ public class PollsController : ControllerBase
 	[HttpGet("all")]
 	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	[Authorize]
 	public async Task<ActionResult> GetAll(CancellationToken cancellationToken)
 	{
 		IEnumerable<Poll> polls = await pollService.GetAllAsync(cancellationToken);
@@ -61,7 +61,7 @@ public class PollsController : ControllerBase
 		//}
 
 		Poll newPoll = await pollService.AddAsync(poll.Adapt<Poll>());
-		return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);  
+		return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll.Adapt<PollResponse>());  
 	}		
 
 
