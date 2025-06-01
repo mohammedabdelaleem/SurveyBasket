@@ -56,7 +56,7 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJWTProvider 
 	}
 
 
-	public async Task<Result<bool>> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+	public async Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
 	{
 		var userId = _jWTProvider.ValidateToken(token);
 		if (userId == null)
@@ -65,19 +65,19 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJWTProvider 
 
 		var user = await _userManager.FindByIdAsync(userId);
 		if (user == null)
-			return Result.Failure<bool>(UserErrors.UserNotFound);
+			return Result.Failure(UserErrors.UserNotFound);
 
 
 		var userRefreshToken = user.RefreshTokens.SingleOrDefault(u => u.Token == refreshToken && u.IsActive);
 		if (userRefreshToken == null)
-			return Result.Failure<bool>(UserErrors.RefreshTokenNotFound);
+			return Result.Failure(UserErrors.RefreshTokenNotFound);
 
 		// reaching the point means ==> every thing is ok
 
 		userRefreshToken.RevokedOn = DateTime.UtcNow; // use RefreshToken once : buissness requirement
 		await _userManager.UpdateAsync(user);
 
-		return Result.Success(true);
+		return Result.Success();
 	}
 
 	private async Task<Result<AuthResponse>> HandleAuthResponse(ApplicationUser user)

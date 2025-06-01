@@ -24,7 +24,7 @@ public class PollsController : ControllerBase
 		var result = await pollService.GetAllAsync(cancellationToken);
 
 		return (result.IsFailure) ? 
-			Problem(statusCode:StatusCodes.Status404NotFound, title:result.Error.code , detail:result.Error.description)
+			result.ToProblem()
 			: Ok(result.Value);
 
 		#region Problem => Results
@@ -47,8 +47,8 @@ public class PollsController : ControllerBase
 	public async Task<ActionResult<Poll>> Get([FromRoute] int id)
 	{
 		var result = await pollService.GetAsync(id);
-		return (result.IsSuccess) ? Ok(result.Value) : 
-			Problem(statusCode:StatusCodes.Status404NotFound, title:result.Error.code , detail:result.Error.description);
+		return (result.IsSuccess) ? Ok(result.Value) :
+			result.ToProblem();
 	}
 
 
@@ -63,7 +63,7 @@ public class PollsController : ControllerBase
 
 		return (result.IsSuccess)? 
 		 CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value):
-		 Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.code, detail: result.Error.description);
+		 result.ToProblem();
 	}
 
 
@@ -76,7 +76,7 @@ public class PollsController : ControllerBase
 		var result = await pollService.UpdateAsync(id, poll, cancellationToken);
 
 		return(result.IsSuccess)? NoContent():
-		 Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.code, detail: result.Error.description);
+		 result.ToProblem();
 
 	}
 
@@ -123,7 +123,7 @@ public class PollsController : ControllerBase
 		var result = await pollService.TogglePublishStatusAsync(id, cancellationToken);
 
 		return (result.IsSuccess)? NoContent():
-			 Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.code, detail: result.Error.description);
+			 result.ToProblem();
 	}
 
 
@@ -136,10 +136,7 @@ public class PollsController : ControllerBase
 		var result = await pollService.DeleteAsync(id, cancellationToken);
 
 		return (result.IsSuccess) ? NoContent() :
-			 Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.code, detail: result.Error.description);
+			 result.ToProblem();
 	}
-
-
-
 }
 
