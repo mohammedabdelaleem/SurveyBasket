@@ -1,5 +1,4 @@
-﻿
-using SurveyBasket.API.Authentication;
+﻿using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Errors;
 using System.Security.Cryptography;
 

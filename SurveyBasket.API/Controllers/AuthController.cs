@@ -13,7 +13,8 @@ public class AuthController(IAuthService authService) : ControllerBase
 	public async Task<ActionResult<AuthResponse>> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
 	{
 		var authResult = await _authService.GetTokenAsync(request.Email , request.Password, cancellationToken);
-	return	(authResult == null) ? BadRequest(new { message = "Invalid Email Or Password" }) : Ok(authResult);
+
+	return	(authResult.IsSuccess) ? Ok(authResult.Value) : BadRequest(authResult.Error);
 	}
 
 	[HttpPost("refresh")]

@@ -1,5 +1,4 @@
 ﻿
-using SurveyBasket.API.Entities;
 
 namespace SurveyBasket.API.Services;
 
@@ -7,61 +6,71 @@ public class PollService(AppDbContext _context) : IPollService
 {
 	private readonly AppDbContext context = _context;
 
-	public async Task< IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default) => 
-		await context.Polls.AsNoTracking().ToListAsync(cancellationToken);
-
-
-	public async Task<Poll?> GetAsync(int id, CancellationToken cancellationToken = default) => 
-		await context.Polls.FindAsync(id,cancellationToken);
-
-
-
-	public async Task<Poll> AddAsync(Poll poll, CancellationToken cancellationToken = default)
+	public async Task<Result<IEnumerable<PollResponse>>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
-		await context.Polls.AddAsync(poll,cancellationToken);
-		await context.SaveChangesAsync(cancellationToken);
-		return poll;
+		var polls = await context.Polls.AsNoTracking().ToListAsync(cancellationToken);
+
+		return (polls.Count() > 0) ?
+			Result.Success(polls.Adapt<IEnumerable<PollResponse>>()) :
+			Result.Failure<IEnumerable<PollResponse>>(PollErrors.PollsEmpty);
+	}
+	
+	public async Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default)
+	{
+		var poll =await context.Polls.FindAsync(id,cancellationToken);
+		return (poll != null) ?
+			Result.Success(poll.Adapt<PollResponse>()) :
+			Result.Failure<PollResponse>(PollErrors.PollNotFound);
 	}
 
-	public async Task<bool> UpdateAsync(int id, Poll poll, CancellationToken cancellationToken = default)
+	public async Task<Result<PollResponse>> AddAsync(PollRequest pollRequest, CancellationToken cancellationToken = default)
 	{
-		Poll? pollDB = await GetAsync(id, cancellationToken);
+		Poll poll = pollRequest.Adapt<Poll>();
+		await context.Polls.AddAsync(poll, cancellationToken);
+		int numberOfStates=await context.SaveChangesAsync(cancellationToken);
+
+		var pollResponse = poll.Adapt<PollResponse>();
+
+		return numberOfStates!=0 ? Result.Success(pollResponse) : Result.Failure<PollResponse>(PollErrors.SaveError);
+	}
+
+	public async Task<Result> UpdateAsync(int id, PollRequest poll, CancellationToken cancellationToken = default)
+	{
+		Poll? pollDB = await context.Polls.FindAsync(id, cancellationToken);
 
 		if (pollDB == null)
-			return false;
+			return Result.Failure(PollErrors.PollNotFound);
 
 		// Update Fields
-		pollDB.Title = poll.Title;
-		pollDB.Summary = poll.Summary;
-		//pollDB.IsPublished = poll.IsPublished;
-		pollDB.StartsAt = poll.StartsAt;
-		pollDB.EndsAt = poll.EndsAt;
+		poll.Adapt<Poll>();
+		poll.Adapt(pollDB);
 
 		await context.SaveChangesAsync(cancellationToken);
-		return true;
+		return Result.Success();
 	}
-	public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+	public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default)
 	{
-		var poll = await GetAsync(id, cancellationToken);
+		var poll = await context.Polls.FindAsync(id, cancellationToken);
 
-		if (poll == null) return false;
-
+		if (poll is null)return Result.Failure(PollErrors.PollNotFound);
+		
 		context.Remove(poll);
-		await context.SaveChangesAsync(cancellationToken);
-		return true;
+
+		int numberOfStates = await context.SaveChangesAsync(cancellationToken);
+
+		return numberOfStates != 0 ? Result.Success() : Result.Failure(PollErrors.SaveError);
 	}
 
-	public async Task<bool> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default)
+	public async Task<Result> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default)
 	{
-		Poll? poll = await GetAsync(id, cancellationToken);
+		Poll? poll = await context.Polls.FindAsync(id, cancellationToken);
 
 		if (poll == null)
-			return false;
+			if (poll == null) return Result.Failure(PollErrors.PollNotFound);
 
 		poll.IsPublished = !poll.IsPublished;
-		
 
-		await context.SaveChangesAsync(cancellationToken);
-		return true;
+		int numberOfStates = await context.SaveChangesAsync(cancellationToken);
+		return numberOfStates != 0 ? Result.Success() : Result.Failure(PollErrors.SaveError);
 	}
 }

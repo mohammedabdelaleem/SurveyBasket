@@ -16,3 +16,4 @@ global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.Options;
 
 global using SurveyBasket.API.Abstractions;
+global using SurveyBasket.API.Errors;
