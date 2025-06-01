@@ -25,14 +25,13 @@ public static class DependencyInjection
 		//	.AllowAnyHeader()));
 
 
-		var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>()!;
 		// AddCors for specific origin(s)
 		services.AddCors(
-		options => options.AddPolicy("MyPolicy", builder =>
+		options => options.AddDefaultPolicy( builder =>
 		builder
 		.AllowAnyMethod()
 		.AllowAnyHeader()
-		.WithOrigins(allowedOrigins)));
+		.WithOrigins(configuration.GetSection("AllowedOrigins").Get<string[]>()!)));
 
 
 		services.AddAuthConfig(configuration);
