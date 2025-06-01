@@ -34,6 +34,6 @@ public class AuthController(IAuthService authService) : ControllerBase
 	public async Task<ActionResult<AuthResponse>> RevokeAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
 	{
 		var isRevoked = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
-		return (!isRevoked) ? BadRequest(new { message = "Operation Failed" }) : Ok();
+		return (!isRevoked.Value) ? BadRequest(new { message = "Operation Failed" }) : Ok();
 	}
 }

@@ -1,4 +1,6 @@
 ﻿
+using SurveyBasket.API.Abstractions;
+
 namespace SurveyBasket.API.Services;
 
 public interface IAuthService
@@ -8,9 +10,9 @@ public interface IAuthService
 	// return set of values || Null If The User Credintial Is Null 
 
 	// Service For getting username and pass <==> JWT Procider Generate Token And Send Back
-	Task<AuthResponse?> GetTokenAsync(string email , string password, CancellationToken cancellationToken=default);
-	Task<AuthResponse?> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default);
+	Task<Result<AuthResponse>> GetTokenAsync(string email , string password, CancellationToken cancellationToken=default);
+	Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default);
 
-	Task<bool> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default);
+	Task<Result<bool>> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default);
 
 }
