@@ -10,12 +10,31 @@ namespace SurveyBasket.API;
 public static class DependencyInjection
 {
 
-	public static IServiceCollection AddDependencies(this IServiceCollection services , IConfiguration configuration)
+	public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
 	{
 
 
 		// Add services to the container.
 		services.AddControllers().AddNewtonsoftJson();
+
+		// AddCors for all origins 
+		//services.AddCors(
+		//	options => options.AddPolicy("AllowAll", builder =>
+		//	builder.AllowAnyOrigin()
+		//	.AllowAnyMethod()
+		//	.AllowAnyHeader()));
+
+
+		var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>()!;
+		// AddCors for specific origin(s)
+		services.AddCors(
+		options => options.AddPolicy("MyPolicy", builder =>
+		builder
+		.AllowAnyMethod()
+		.AllowAnyHeader()
+		.WithOrigins(allowedOrigins)));
+
+
 		services.AddAuthConfig(configuration);
 
 
@@ -97,7 +116,7 @@ public static class DependencyInjection
 		// when you need to use [Authorize] with Controller or Endpoint 
 		// you don't need to tell them you use JwtBearer
 		// you just add the configurations here
-		
+
 		services.AddAuthentication(options =>
 		{
 			options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -119,7 +138,7 @@ public static class DependencyInjection
 
 				};
 			});
-	       
+
 		return services;
 	}
 
