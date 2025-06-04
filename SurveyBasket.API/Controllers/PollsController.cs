@@ -54,12 +54,13 @@ public class PollsController : ControllerBase
 
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
-	public async Task<ActionResult> Add([FromBody] PollRequest poll)
+	public async Task<ActionResult> Add([FromBody] PollRequest poll, CancellationToken cancellationToken=default)
 	{
+
 		if (poll is null)
 			return BadRequest(poll);
 
-		var result = await pollService.AddAsync(poll);
+		var result = await pollService.AddAsync(poll, cancellationToken);
 
 		return (result.IsSuccess)? 
 		 CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value):

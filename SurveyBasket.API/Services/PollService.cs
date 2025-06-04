@@ -1,5 +1,7 @@
 ﻿
 
+using SurveyBasket.API.Contracts.Poll;
+
 namespace SurveyBasket.API.Services;
 
 public class PollService(AppDbContext _context) : IPollService
@@ -25,6 +27,11 @@ public class PollService(AppDbContext _context) : IPollService
 
 	public async Task<Result<PollResponse>> AddAsync(PollRequest pollRequest, CancellationToken cancellationToken = default)
 	{
+
+		bool isExistingTitle = await _context.Polls.AnyAsync(p => p.Title == pollRequest.Title, cancellationToken: cancellationToken);
+		if (isExistingTitle)
+			return Result.Failure<PollResponse>(PollErrors.DuplicateTitle);
+
 		Poll poll = pollRequest.Adapt<Poll>();
 		await context.Polls.AddAsync(poll, cancellationToken);
 		int numberOfStates=await context.SaveChangesAsync(cancellationToken);
@@ -34,16 +41,23 @@ public class PollService(AppDbContext _context) : IPollService
 		return numberOfStates!=0 ? Result.Success(pollResponse) : Result.Failure<PollResponse>(PollErrors.SaveError);
 	}
 
-	public async Task<Result> UpdateAsync(int id, PollRequest poll, CancellationToken cancellationToken = default)
+	public async Task<Result> UpdateAsync(int id, PollRequest pollRequest, CancellationToken cancellationToken = default)
 	{
+
+		bool isExistingTitle = await _context.Polls.AnyAsync(p => p.Title == pollRequest.Title && p.Id != id, cancellationToken: cancellationToken);
+		if (isExistingTitle)
+			return Result.Failure<PollResponse>(PollErrors.DuplicateTitle);
+
+
+
 		Poll? pollDB = await context.Polls.FindAsync(id, cancellationToken);
 
 		if (pollDB == null)
 			return Result.Failure(PollErrors.PollNotFound);
 
 		// Update Fields
-		poll.Adapt<Poll>();
-		poll.Adapt(pollDB);
+		pollRequest.Adapt<Poll>();
+		pollRequest.Adapt(pollDB);
 
 		await context.SaveChangesAsync(cancellationToken);
 		return Result.Success();
