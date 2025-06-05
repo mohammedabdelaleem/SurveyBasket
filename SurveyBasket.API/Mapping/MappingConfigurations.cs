@@ -1,13 +1,18 @@
 ﻿
 
+using SurveyBasket.API.Contracts.Questions;
+
 namespace SurveyBasket.API.Mapping;
 
 public class MappingConfigurations : IRegister
 {
 	public void Register(TypeAdapterConfig config)
 	{
-		 //
+		//config.NewConfig<QuestionRequest, Question>()
+		//.Ignore(nameof(Question.Answers));
 
 
+		config.NewConfig<QuestionRequest, Question>()
+			.Map(dest => dest.Answers, src => src.Answers.Select(answer => new Answer { Content = answer }));
 	}
 }

@@ -9,7 +9,7 @@ public class Poll : AuditableEntity
     public DateOnly StartsAt { get; set; }=DateOnly.FromDateTime(DateTime.Now);
 	public DateOnly EndsAt { get; set; }
 
-	public ICollection<Question> Question { get; set; } = [];
+	public ICollection<Question> Questions { get; set; } = [];
 
 
 }
