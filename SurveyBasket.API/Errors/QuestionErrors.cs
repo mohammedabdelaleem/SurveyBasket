@@ -4,11 +4,11 @@
 public static class QuestionErrors
 {
 
-	public static readonly Error PollNotFound 
+	public static readonly Error QuestionNotFound
 		= new Error("Question.NotFound", "Question With Given Id Not Found", StatusCodes.Status404NotFound);
 
 
-	public static readonly Error PollsEmpty
+	public static readonly Error QuestionsEmpty
 		= new Error("Question.Empty", "No Question Content Are Found", StatusCodes.Status404NotFound);
 
 

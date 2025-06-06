@@ -6,6 +6,8 @@ public class QuestionService(AppDbContext context) : IQuestionService
 {
 	private readonly AppDbContext _context = context;
 
+
+	// this question follows any poll 
 	public async Task<Result<QuestionResponse>> AddAsync(int pollId, QuestionRequest request, CancellationToken cancellationToken)
 	{
 		var pollIsExists = await _context.Polls.AnyAsync(p => p.Id == pollId, cancellationToken);
@@ -14,17 +16,19 @@ public class QuestionService(AppDbContext context) : IQuestionService
 			return Result.Failure<QuestionResponse>(PollErrors.PollNotFound);
 
 
-		var isQuestionFoundWithTheSamePoll = await _context.Questions.AnyAsync(q => q.Content == request.Content && q.PollId == pollId, cancellationToken);
+		var isQuestionFoundWithTheSamePoll = await _context.Questions.AnyAsync(q => q.Content == request.Content 
+						&& q.PollId == pollId, cancellationToken);
+
 		if (isQuestionFoundWithTheSamePoll)
 			return Result.Failure<QuestionResponse>(QuestionErrors.DuplicateContent);
 
 
 		// now
 		// poll is found 
-		// question content is unique at poll
+		// question content is unique at poll === No Duplicate
 
 		var question = request.Adapt<Question>();
-		question.PollId = pollId; ///
+		question.PollId = pollId; ///Don't forget this 
 
 		//request.Answers.ForEach(answer =>{question.Answers.Add(new Answer { Content = answer });});
 
@@ -33,5 +37,28 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 
 		return Result.Success(question.Adapt<QuestionResponse>());
+	}
+
+	public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken)
+	{
+		
+		var pollIsExists = await _context.Polls.AnyAsync(p=> p.Id == pollId, cancellationToken);
+
+		if(!pollIsExists)
+			return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+
+
+		var questionsAtPollTarget = await _context.Questions
+			.Include(q=> q.Answers)
+			.Where(q=>q.PollId == pollId)
+			.AsNoTracking()
+			.ToListAsync(cancellationToken);
+
+		if (questionsAtPollTarget.Count == 0)
+			return Result.Failure<IEnumerable<QuestionResponse>>(QuestionErrors.QuestionsEmpty);
+
+
+		return Result.Success(questionsAtPollTarget.Adapt<IEnumerable<QuestionResponse>>());
+
 	}
 }
