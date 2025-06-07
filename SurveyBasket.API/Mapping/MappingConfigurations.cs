@@ -17,7 +17,9 @@ public class MappingConfigurations : IRegister
 	
 		////////////////////////
 	
-
+	config.NewConfig<Question, QuestionResponse>()
+			.Map(dest => dest.Answers,
+			src => src.Answers.Where(a => a.IsActive));
 
 
 	}

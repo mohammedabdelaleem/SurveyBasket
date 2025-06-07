@@ -107,5 +107,65 @@ public class QuestionService(AppDbContext context) : IQuestionService
 		return Result.Success(question.Adapt<QuestionResponse>());
 	}
 
-	
+
+	public async Task<Result> UpdateAsync(int pollId, int questionId, QuestionRequest request, CancellationToken cancellationToken)
+	{
+
+		var questionIsExists = await _context.Questions.AnyAsync(
+			q=>q.PollId == pollId &&
+			q.Content == request.Content && 
+			q.Id != questionId,
+			cancellationToken);
+
+		if (questionIsExists)
+			return Result.Failure(QuestionErrors.DuplicateContent);
+
+		var questionInDB = await _context.Questions
+			.Include(q=>q.Answers)
+			.SingleOrDefaultAsync(
+			q=>q.PollId == pollId && q.Id == questionId,
+			cancellationToken);
+
+		if (questionInDB == null)
+			return Result.Failure(QuestionErrors.QuestionNotFound);
+
+		questionInDB.Content = request.Content;
+
+		// Answers DB
+		var answersDB = questionInDB.Answers.Select(a=> a.Content).ToList();
+		
+
+		// add new answers
+		var newAnswers = request.Answers.Except(answersDB).ToList();
+
+		newAnswers.ForEach(answer =>
+			questionInDB.Answers.Add(new Answer { Content = answer })
+		);
+
+
+		// update the current state simtenously
+		questionInDB.Answers.ToList().ForEach(answer =>
+				answer.IsActive = request.Answers.Contains(answer.Content));
+
+
+		await _context.SaveChangesAsync(cancellationToken);
+
+		return Result.Success();
+	}
+
+
+	public async Task<Result> ToggleStatusAsync(int pollId, int questionId, CancellationToken cancellationToken)
+	{
+		var qusetionInDB = await _context.Questions.SingleOrDefaultAsync(q=>q.PollId == pollId && q.Id == questionId, cancellationToken);
+
+		if (qusetionInDB is null)
+			return Result.Failure(QuestionErrors.QuestionNotFound);
+
+		qusetionInDB.IsActive = !qusetionInDB.IsActive;
+		await _context.SaveChangesAsync(cancellationToken);
+
+		return Result.Success();
+	}
+
+
 }

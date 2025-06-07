@@ -40,4 +40,22 @@ public class QuestionController(IQuestionService questionService) : ControllerBa
 			result.ToProblem();
 	}
 
+
+	[HttpPut("{questionId}")]
+	public async Task<IActionResult> Update([FromRoute] int pollId, [FromRoute] int questionId, [FromBody] QuestionRequest request, CancellationToken cancellation = default)
+	{
+		var result =await  _questionService.UpdateAsync(pollId,questionId,request, cancellation);
+
+		return result.IsSuccess ?
+			NoContent() : result.ToProblem();
+	}
+
+	[HttpPut("{questionId}/toggle-status")]
+	public async Task<IActionResult> ToggleStatus([FromRoute] int pollId, [FromRoute] int questionId, CancellationToken cancellation = default)
+	{
+		var result = await _questionService.ToggleStatusAsync(pollId, questionId, cancellation);
+
+		return result.IsSuccess ? 
+			NoContent() : result.ToProblem();
+	}
 }
