@@ -20,10 +20,13 @@ public class QuestionController(IQuestionService questionService) : ControllerBa
 			: result.ToProblem();
 	}
 
-	[HttpGet("{id}")]
-	public async Task<IActionResult> Get(int pollId , int id)
+	[HttpGet("{questionId}")]
+	public async Task<IActionResult> Get([FromRoute] int pollId, [FromRoute]int questionId, CancellationToken cancellationToken = default)
 	{
-		return  new ContentResult();
+		var result = await _questionService.GetAsync(pollId, questionId, cancellationToken);
+
+		return result.IsSuccess ? 
+			Ok(result.Value) : result.ToProblem();
 	}
 
 

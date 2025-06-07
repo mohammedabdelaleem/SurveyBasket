@@ -18,6 +18,7 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 		#region EF Tricks
 
+		//// get all columns 
 		//var questionsAtPollTarget = await _context.Questions
 		//	.Include(q => q.Answers)
 		//	.Where(q => q.PollId == pollId)
@@ -25,10 +26,11 @@ public class QuestionService(AppDbContext context) : IQuestionService
 		//	.ToListAsync(cancellationToken);
 
 
+		//// to select specific columns
 		//var questionsAtPollTarget = await _context.Questions
 		//		.Include(q => q.Answers)
 		//		.Where(q => q.PollId == pollId)
-		//		.Select(q => new QuestionResponse( // to select specific columns
+		//		.Select(q => new QuestionResponse( 
 		//			q.Id,
 		//			q.Content,
 		//			q.Answers.Select(a => new AnswerResponse(a.Id, a.Content)).ToList()
@@ -41,8 +43,8 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 		//********using mapster projection****************
 		var questionsAtPollTarget = await _context.Questions
-				.Include(q => q.Answers)
 				.Where(q => q.PollId == pollId)
+				.Include(q => q.Answers)
 				.ProjectToType<QuestionResponse>()
 				.AsNoTracking()
 				.ToListAsync(cancellationToken);
@@ -55,6 +57,24 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 	}
 
+	public async Task<Result<QuestionResponse>> GetAsync(int pollId, int questionId, CancellationToken cancellationToken)
+	{
+		
+		var questionIsExists = await _context.Questions
+			.AnyAsync(q => q.PollId == pollId && q.Id == questionId);
+
+		if(!questionIsExists)
+			return Result.Failure<QuestionResponse>(QuestionErrors.QuestionNotFound);
+
+
+		var questionResponse = await _context.Questions
+			.Include(q => q.Answers)
+			.Where(q => q.PollId == pollId && q.Id == questionId)
+			.ProjectToType<QuestionResponse>()
+			.SingleOrDefaultAsync(cancellationToken);
+
+		return Result.Success(questionResponse!);
+	}
 	// this question follows any poll 
 	public async Task<Result<QuestionResponse>> AddAsync(int pollId, QuestionRequest request, CancellationToken cancellationToken)
 	{
@@ -87,4 +107,5 @@ public class QuestionService(AppDbContext context) : IQuestionService
 		return Result.Success(question.Adapt<QuestionResponse>());
 	}
 
+	
 }
