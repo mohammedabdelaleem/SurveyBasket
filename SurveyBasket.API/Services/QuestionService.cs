@@ -1,4 +1,5 @@
-﻿using SurveyBasket.API.Contracts.Questions;
+﻿using SurveyBasket.API.Contracts.Abswers;
+using SurveyBasket.API.Contracts.Questions;
 
 namespace SurveyBasket.API.Services;
 
@@ -6,6 +7,53 @@ public class QuestionService(AppDbContext context) : IQuestionService
 {
 	private readonly AppDbContext _context = context;
 
+	public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken)
+	{
+
+		var pollIsExists = await _context.Polls.AnyAsync(p => p.Id == pollId, cancellationToken);
+
+		if (!pollIsExists)
+			return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+
+
+		#region EF Tricks
+
+		//var questionsAtPollTarget = await _context.Questions
+		//	.Include(q => q.Answers)
+		//	.Where(q => q.PollId == pollId)
+		//	.AsNoTracking()
+		//	.ToListAsync(cancellationToken);
+
+
+		//var questionsAtPollTarget = await _context.Questions
+		//		.Include(q => q.Answers)
+		//		.Where(q => q.PollId == pollId)
+		//		.Select(q => new QuestionResponse( // to select specific columns
+		//			q.Id,
+		//			q.Content,
+		//			q.Answers.Select(a => new AnswerResponse(a.Id, a.Content)).ToList()
+		//		))
+		//		.AsNoTracking()
+		//		.ToListAsync(cancellationToken);
+
+		#endregion
+
+
+		//********using mapster projection****************
+		var questionsAtPollTarget = await _context.Questions
+				.Include(q => q.Answers)
+				.Where(q => q.PollId == pollId)
+				.ProjectToType<QuestionResponse>()
+				.AsNoTracking()
+				.ToListAsync(cancellationToken);
+
+		if (questionsAtPollTarget.Count == 0)
+			return Result.Failure<IEnumerable<QuestionResponse>>(QuestionErrors.QuestionsEmpty);
+
+
+		return Result.Success(questionsAtPollTarget.Adapt<IEnumerable<QuestionResponse>>());
+
+	}
 
 	// this question follows any poll 
 	public async Task<Result<QuestionResponse>> AddAsync(int pollId, QuestionRequest request, CancellationToken cancellationToken)
@@ -16,7 +64,7 @@ public class QuestionService(AppDbContext context) : IQuestionService
 			return Result.Failure<QuestionResponse>(PollErrors.PollNotFound);
 
 
-		var isQuestionFoundWithTheSamePoll = await _context.Questions.AnyAsync(q => q.Content == request.Content 
+		var isQuestionFoundWithTheSamePoll = await _context.Questions.AnyAsync(q => q.Content == request.Content
 						&& q.PollId == pollId, cancellationToken);
 
 		if (isQuestionFoundWithTheSamePoll)
@@ -39,26 +87,4 @@ public class QuestionService(AppDbContext context) : IQuestionService
 		return Result.Success(question.Adapt<QuestionResponse>());
 	}
 
-	public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken)
-	{
-		
-		var pollIsExists = await _context.Polls.AnyAsync(p=> p.Id == pollId, cancellationToken);
-
-		if(!pollIsExists)
-			return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
-
-
-		var questionsAtPollTarget = await _context.Questions
-			.Include(q=> q.Answers)
-			.Where(q=>q.PollId == pollId)
-			.AsNoTracking()
-			.ToListAsync(cancellationToken);
-
-		if (questionsAtPollTarget.Count == 0)
-			return Result.Failure<IEnumerable<QuestionResponse>>(QuestionErrors.QuestionsEmpty);
-
-
-		return Result.Success(questionsAtPollTarget.Adapt<IEnumerable<QuestionResponse>>());
-
-	}
 }
