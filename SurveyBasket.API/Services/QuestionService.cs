@@ -1,5 +1,4 @@
-﻿using SurveyBasket.API.Contracts.Abswers;
-using SurveyBasket.API.Contracts.Questions;
+﻿using SurveyBasket.API.Contracts.Questions;
 
 namespace SurveyBasket.API.Services;
 
@@ -61,7 +60,8 @@ public class QuestionService(AppDbContext context) : IQuestionService
 	{
 		
 		var questionIsExists = await _context.Questions
-			.AnyAsync(q => q.PollId == pollId && q.Id == questionId);
+			.AnyAsync(q => q.PollId == pollId && q.Id == questionId,
+					cancellationToken);
 
 		if(!questionIsExists)
 			return Result.Failure<QuestionResponse>(QuestionErrors.QuestionNotFound);
@@ -75,6 +75,8 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 		return Result.Success(questionResponse!);
 	}
+
+
 	// this question follows any poll 
 	public async Task<Result<QuestionResponse>> AddAsync(int pollId, QuestionRequest request, CancellationToken cancellationToken)
 	{
@@ -110,20 +112,21 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 	public async Task<Result> UpdateAsync(int pollId, int questionId, QuestionRequest request, CancellationToken cancellationToken)
 	{
-
 		var questionIsExists = await _context.Questions.AnyAsync(
 			q=>q.PollId == pollId &&
 			q.Content == request.Content && 
-			q.Id != questionId,
+			q.Id != questionId, // send the same question with another answers || send the same question with the same answers
 			cancellationToken);
+
 
 		if (questionIsExists)
 			return Result.Failure(QuestionErrors.DuplicateContent);
 
+
 		var questionInDB = await _context.Questions
 			.Include(q=>q.Answers)
 			.SingleOrDefaultAsync(
-			q=>q.PollId == pollId && q.Id == questionId,
+				q=>q.PollId == pollId && q.Id == questionId,
 			cancellationToken);
 
 		if (questionInDB == null)
@@ -131,16 +134,16 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 		questionInDB.Content = request.Content;
 
-		// Answers DB
+		// Answers DB ===> as list<string> 
 		var answersDB = questionInDB.Answers.Select(a=> a.Content).ToList();
 		
 
-		// add new answers
-		var newAnswers = request.Answers.Except(answersDB).ToList();
+		// add new answers  
+		var newAnswers = request.Answers.Except(answersDB).ToList();  // A-B
 
-		newAnswers.ForEach(answer =>
-			questionInDB.Answers.Add(new Answer { Content = answer })
-		);
+		newAnswers.ForEach(newAnswer =>
+			questionInDB.Answers.Add(new Answer { Content = newAnswer })
+		); //  i think we can also use Set DS Which Is Collect Distincts Only 
 
 
 		// update the current state simtenously

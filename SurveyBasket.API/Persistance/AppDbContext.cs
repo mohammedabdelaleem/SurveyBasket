@@ -17,7 +17,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
 		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
 
-		var cascadeFKs = modelBuilder.Model
+		// change on delete behaviour
+ 		var cascadeFKs = modelBuilder.Model
 			.GetEntityTypes().SelectMany(e => e.GetForeignKeys())
 			.Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade && !fk.IsOwnership);
 
@@ -31,7 +32,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
 
 	public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
 	{
-		// get all tracked entries which inherite from AuditableEntity
+		// get all tracked entries which are inherited from AuditableEntity
 		var entries = ChangeTracker.Entries<AuditableEntity>();
 
 		// from jwt token 
@@ -51,7 +52,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
 		}
 
 		return base.SaveChangesAsync(cancellationToken);
-
 	}
 
 }

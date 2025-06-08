@@ -14,13 +14,13 @@ public class QuestionRequestValidator : AbstractValidator<QuestionRequest>
 		// at least 2 answers
 		RuleFor(x => x.Answers)
 			.Must(x=>x.Count >= 2)
-			.WithMessage("Answers Must Be At Least 2")
+			.WithMessage("Must Be At Least 2 Answers")
 			.When(x=>x.Answers !=null);
 
 		//distinct answers
 		RuleFor(x => x.Answers)
 			.Must(x => x.Count == x.Distinct().Count())
-			.WithMessage("Only Distinct Answers")
+			.WithMessage("Only Distinct Answers -- No Duplicates.")
 			.When(x => x.Answers != null);
 	}
 }
