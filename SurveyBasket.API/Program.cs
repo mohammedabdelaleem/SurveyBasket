@@ -1,8 +1,10 @@
-
-
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
+
+builder.Host.UseSerilog((context, configuration) =>
+	configuration.ReadFrom.Configuration(context.Configuration));
 
 
 
@@ -18,6 +20,8 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseCors();
+
+app.UseSerilogRequestLogging();
 
 app.UseAuthorization();
 app.MapControllers();

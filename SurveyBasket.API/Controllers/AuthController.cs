@@ -2,9 +2,10 @@
 namespace SurveyBasket.API.Controllers;
 [Route("[controller]")]
 [ApiController]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 {
 	private readonly IAuthService _authService = authService;
+	private readonly ILogger<AuthController> _logger = logger;
 
 	[HttpPost("login")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
@@ -12,6 +13,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 
 	public async Task<ActionResult<AuthResponse>> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
 	{
+		_logger.LogInformation("Logging With Email: {email} , Password :{password}", request.Email, request.Password); //use variables here not string Interpolation $ ==> It's Better Searchig for variable[key] called email with value like test@test.com than searchig for a word called email 
 		var authResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
 
 		return (authResult.IsSuccess) ? Ok(authResult.Value) : authResult.ToProblem();
