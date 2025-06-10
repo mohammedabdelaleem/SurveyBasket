@@ -15,6 +15,8 @@ public static class VoteErrors
 	public static readonly Error DuplicateVote
 		= new Error("Vote.DuplicateVote", "This User Is Voted Before,You Can Vote Once", StatusCodes.Status409Conflict);
 
+	public static readonly Error InvalidQuestions
+	= new Error("Question.InvalidQuestions", "Invalid Questions", StatusCodes.Status404NotFound);
 
 
 }

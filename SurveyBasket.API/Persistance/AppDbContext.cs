@@ -1,6 +1,5 @@
 ﻿
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace SurveyBasket.API.Persistance;
 

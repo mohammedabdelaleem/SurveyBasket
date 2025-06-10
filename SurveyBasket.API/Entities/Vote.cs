@@ -11,6 +11,6 @@ public sealed class Vote
 
 	public Poll Poll { get; set; } = default!;
 	public ApplicationUser User { get; set; } = default!;
-	ICollection<VoteAnswer> VoteAnswers { get; set; } = [];
+	public ICollection<VoteAnswer> VoteAnswers { get; set; } = [];
 
 }
