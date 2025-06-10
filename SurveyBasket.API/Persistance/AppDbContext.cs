@@ -39,7 +39,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
 		var entries = ChangeTracker.Entries<AuditableEntity>();
 
 		// from jwt token 
-		var currentUserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+		var currentUserId = _httpContextAccessor.HttpContext?.User.GetUserId();
 
 		foreach (var entityEntry in entries)
 		{

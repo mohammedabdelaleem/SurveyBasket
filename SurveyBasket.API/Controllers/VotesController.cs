@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+﻿
 
 namespace SurveyBasket.API.Controllers;
 
@@ -15,7 +14,7 @@ public class VotesController(IQuestionService questionService) : ControllerBase
 	public async Task<IActionResult> Start([FromRoute] int pollId, CancellationToken cancellation=default)
 	{
 		// Authorized User At HttpContext
-		string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+		string userId = User.GetUserId()!;
 
 		var result = await _questionService.GetAvailableAsync(pollId, userId, cancellation);
 
