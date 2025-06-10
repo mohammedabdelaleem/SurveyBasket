@@ -13,4 +13,14 @@ public class ResultsController(IResultService resultService) : ControllerBase
 
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}
+
+	[HttpGet("votes-per-day")]
+	public async Task<IActionResult> GetVotesPerDay([FromRoute] int pollId, CancellationToken cancellationToken = default)
+	{
+		var result = await _resultService.GetVotesPerDayAsync(pollId, cancellationToken);
+
+		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+	}
+
 }
+
