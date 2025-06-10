@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.API.Entities;
 
-public class Poll : AuditableEntity
+public sealed class Poll : AuditableEntity
 {
 	public int Id { get; set; }
 	public string Title { get; set; } = string.Empty;
@@ -11,5 +11,6 @@ public class Poll : AuditableEntity
 
 	public ICollection<Question> Questions { get; set; } = [];
 
+	public ICollection<Vote> Votes { get; set; } = [];
 
 }

@@ -1,5 +1,6 @@
 ﻿
 
+using SurveyBasket.API.Contracts.Abswers;
 using SurveyBasket.API.Contracts.Questions;
 
 namespace SurveyBasket.API.Mapping;
@@ -21,6 +22,9 @@ public class MappingConfigurations : IRegister
 			.Map(dest => dest.Answers,
 			src => src.Answers.Where(a => a.IsActive));
 
+
+		config.NewConfig<Question, QuestionResponse>()
+			.Map(dest => dest.Answers, src => src.Answers.Select(answer => new AnswerResponse (answer.Id, answer.Content))); // super : Thanks Allah
 
 	}
 }

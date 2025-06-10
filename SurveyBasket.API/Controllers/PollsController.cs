@@ -39,6 +39,18 @@ public class PollsController : ControllerBase
 
 	}
 
+	[HttpGet("current")]
+	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<ActionResult> GetCurrent(CancellationToken cancellationToken)
+	{
+		var result = await pollService.GetCurrentAsync(cancellationToken);
+
+		return (result.IsFailure) ?
+			result.ToProblem()
+			: Ok(result.Value);
+
+	}
 
 
 	[HttpGet("{id}")]

@@ -9,7 +9,7 @@
 // it will add also the forign key for the owner
 // ======> The PK For The Table Will Be Composite Between Both	
 [Owned]
-public class RefreshToken
+public sealed class RefreshToken
 {
 	public string Token { get; set; } = string.Empty;
 	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

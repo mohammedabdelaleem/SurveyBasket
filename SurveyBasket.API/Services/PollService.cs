@@ -1,7 +1,5 @@
 ﻿
 
-using SurveyBasket.API.Contracts.Poll;
-
 namespace SurveyBasket.API.Services;
 
 public class PollService(AppDbContext _context) : IPollService
@@ -10,13 +8,28 @@ public class PollService(AppDbContext _context) : IPollService
 
 	public async Task<Result<IEnumerable<PollResponse>>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
-		var polls = await context.Polls.AsNoTracking().ToListAsync(cancellationToken);
+		var polls = await context.Polls
+			.AsNoTracking()
+			.ProjectToType<PollResponse>()
+			.ToListAsync(cancellationToken);
 
 		return (polls.Count() > 0) ?
-			Result.Success(polls.Adapt<IEnumerable<PollResponse>>()) :
+			Result.Success<IEnumerable<PollResponse>>(polls) :
 			Result.Failure<IEnumerable<PollResponse>>(PollErrors.PollsEmpty);
 	}
-	
+	public async Task<Result<IEnumerable<PollResponse>>> GetCurrentAsync(CancellationToken cancellationToken = default)
+	{
+		// which polls i can choose to make votes on it ?
+		var polls = await context.Polls
+			.Where(p=>p.IsPublished && DateOnly.FromDateTime(DateTime.UtcNow) >= p.StartsAt && DateOnly.FromDateTime(DateTime.UtcNow) <= p.EndsAt )
+			.AsNoTracking()
+			.ProjectToType<PollResponse>()
+			.ToListAsync(cancellationToken);
+
+		return (polls.Count() > 0) ?
+			Result.Success<IEnumerable<PollResponse>>(polls) :
+			Result.Failure<IEnumerable<PollResponse>>(PollErrors.PollsEmpty);
+	}
 	public async Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default)
 	{
 		var poll =await context.Polls.FindAsync(id,cancellationToken);
