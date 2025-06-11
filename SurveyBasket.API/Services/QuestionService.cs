@@ -1,10 +1,14 @@
 ﻿using SurveyBasket.API.Contracts.Questions;
+using System.Collections.Generic;
 
 namespace SurveyBasket.API.Services;
 
-public class QuestionService(AppDbContext context) : IQuestionService
+public class QuestionService(AppDbContext context, ICacheService cacheService, ILogger<QuestionService> logger) : IQuestionService
 {
 	private readonly AppDbContext _context = context;
+	private readonly ICacheService _cacheService = cacheService;
+	private readonly ILogger<QuestionService> _logger = logger;
+	private readonly string _chachePrefix = "availableQuestions";
 
 	public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken)
 	{
@@ -78,15 +82,32 @@ public class QuestionService(AppDbContext context) : IQuestionService
 			return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.DuplicateVote);
 
 
+		// Distributed Caching 
+		var cacheKey = $"{_chachePrefix}-{pollId}";
+		var cachedQuestions = await _cacheService.GetAsync<IEnumerable<QuestionResponse>>(cacheKey, cancellationToken);
+		IEnumerable<QuestionResponse> availabeQuestions = [];
 
-		var availabeQuestions = await _context.Questions
-			.Where(q=>q.PollId == pollId && q.IsActive)
-			.Include(q=>q.Answers) // active answers 
-			.ProjectToType<QuestionResponse>()
-			.AsNoTracking()
-			.ToListAsync(cancellationToken);
+		if(cachedQuestions is null)
+		{
+			_logger.LogInformation("Select Questions From Db\n");
+			 availabeQuestions = await _context.Questions
+				.Where(q => q.PollId == pollId && q.IsActive)
+				.Include(q => q.Answers) // active answers 
+				.ProjectToType<QuestionResponse>()
+				.AsNoTracking()
+				.ToListAsync(cancellationToken);
 
-		return Result.Success<IEnumerable < QuestionResponse >> (availabeQuestions);
+			await _cacheService.SetAsync(cacheKey,availabeQuestions, cancellationToken);
+		}
+		else
+		{
+			_logger.LogInformation("Get Questions From Cache\n");
+
+			availabeQuestions = cachedQuestions;
+		}
+			
+
+		return Result.Success(availabeQuestions);
 		
 	}
 	public async Task<Result<QuestionResponse>> GetAsync(int pollId, int questionId, CancellationToken cancellationToken)
@@ -138,6 +159,7 @@ public class QuestionService(AppDbContext context) : IQuestionService
 		await _context.AddAsync(question, cancellationToken);
 		await _context.SaveChangesAsync(cancellationToken);
 
+		await _cacheService.RemoveAsync($"{_chachePrefix}-{pollId}", cancellationToken);
 
 		return Result.Success(question.Adapt<QuestionResponse>());
 	}
@@ -186,6 +208,8 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 		await _context.SaveChangesAsync(cancellationToken);
 
+		await _cacheService.RemoveAsync($"{_chachePrefix}-{pollId}", cancellationToken);
+
 		return Result.Success();
 	}
 
@@ -199,6 +223,8 @@ public class QuestionService(AppDbContext context) : IQuestionService
 
 		qusetionInDB.IsActive = !qusetionInDB.IsActive;
 		await _context.SaveChangesAsync(cancellationToken);
+
+		await _cacheService.RemoveAsync($"{_chachePrefix}-{pollId}", cancellationToken);
 
 		return Result.Success();
 	}

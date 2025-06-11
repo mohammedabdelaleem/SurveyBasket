@@ -3,6 +3,8 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
 
+builder.Services.AddDistributedMemoryCache();
+
 builder.Host.UseSerilog((context, configuration) =>
 	configuration.ReadFrom.Configuration(context.Configuration));
 
