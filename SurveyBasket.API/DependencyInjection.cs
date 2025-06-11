@@ -17,6 +17,8 @@ public static class DependencyInjection
 		// Add services to the container.
 		services.AddControllers().AddNewtonsoftJson();
 
+		services.AddHybridCache();
+
 		// AddCors for all origins 
 		//services.AddCors(
 		//	options => options.AddPolicy("AllowAll", builder =>
@@ -33,7 +35,6 @@ public static class DependencyInjection
 		.AllowAnyHeader()
 		.WithOrigins(configuration.GetSection("AllowedOrigins").Get<string[]>()!)));
 
-
 		services.AddAuthConfig(configuration);
 
 
@@ -49,7 +50,7 @@ public static class DependencyInjection
 		services.AddScoped<IQuestionService, QuestionService>();
 		services.AddScoped<IVoteService, VoteService>();
 		services.AddScoped<IResultService, ResultService>();
-		services.AddScoped<ICacheService, CacheService>();
+
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
 		services.AddProblemDetails();
