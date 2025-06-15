@@ -69,7 +69,7 @@ public class AuthService(
 		var emailIsExists = await _userManager.Users.AnyAsync(u=>u.Email == request.Email, cancellationToken);
 
 		if (emailIsExists)
-			return Result.Failure<AuthResponse>(UserErrors.DuplicatedEmail);
+			return Result.Failure(UserErrors.DuplicatedEmail);
 
 
 		var newUser = request.Adapt<ApplicationUser>();
@@ -94,6 +94,37 @@ public class AuthService(
 
 		var error = result.Errors.First();
 		return Result.Failure<AuthResponse>(new Error(error.Code, error.Description, StatusCodes.Status409Conflict));
+	}
+
+	public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request)
+	{
+		if (await _userManager.FindByIdAsync(request.UserId) is not { } user)
+			return Result.Failure(UserErrors.InvalidCode);
+
+
+		if(user.EmailConfirmed)
+			return Result.Failure(UserErrors.DuplicatedConfirmation); // send the same request more than 1
+
+		var code = request.Code;
+		try
+		{ 
+			code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+		}
+		catch(FormatException)
+		{
+			return Result.Failure(UserErrors.InvalidCode);
+		}
+
+
+		// now we need to confirm email
+		var result = await _userManager.ConfirmEmailAsync(user, code);
+		if (result.Succeeded)
+	   	   return Result.Success();
+
+
+		var error = result.Errors.First();
+		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+
 	}
 
 	public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
