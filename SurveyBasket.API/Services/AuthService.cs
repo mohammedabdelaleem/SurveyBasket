@@ -27,6 +27,35 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJWTProvider 
 		return await HandleAuthResponse(user);
 	}
 
+	// when you dealing with registeration service we have 2 choices
+	// 1 -  Auto-Login : After Register Sent JWT Token To Frontend and Login Without your Interaction 
+	// 2 -  Register => Confirm Email => Login 
+
+
+	// the first way , Learn It For Yourself , We Don't Use It 
+	public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken=default)
+	{
+		// unique email checker 
+		var emailIsExists = await _userManager.Users.AnyAsync(u=>u.Email == request.Email, cancellationToken);
+
+		if (emailIsExists)
+			return Result.Failure<AuthResponse>(UserErrors.DuplicatedEmail);
+
+
+		var newUser = request.Adapt<ApplicationUser>();
+		//newUser.Email = request.Email;	// Adding newConfiguration Mapping
+
+		var result = await _userManager.CreateAsync(newUser, request.Password);
+
+		if(result.Succeeded)
+		{
+			return await HandleAuthResponse(newUser);
+		}
+
+
+		var error = result.Errors.First();
+		return Result.Failure<AuthResponse>(new Error(error.Code, error.Description, StatusCodes.Status409Conflict));
+	}
 
 	public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
 	{
