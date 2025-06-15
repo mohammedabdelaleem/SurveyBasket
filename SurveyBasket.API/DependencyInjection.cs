@@ -108,7 +108,8 @@ public static class DependencyInjection
 		services.AddSingleton<IJWTProvider, JWTProvider>();
 
 		services.AddIdentity<ApplicationUser, IdentityRole>()
-			.AddEntityFrameworkStores<AppDbContext>();
+			.AddEntityFrameworkStores<AppDbContext>()
+			.AddDefaultTokenProviders();
 
 
 		// Configurations 
@@ -150,7 +151,7 @@ public static class DependencyInjection
 		services.Configure<IdentityOptions>(options =>
 		{
 			options.Password.RequiredLength = 8;
-			//options.SignIn.RequireConfirmedEmail = true;
+			options.SignIn.RequireConfirmedEmail = true;
 			options.User.RequireUniqueEmail = true;
 
 		});

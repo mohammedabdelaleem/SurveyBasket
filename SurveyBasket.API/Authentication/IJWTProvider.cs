@@ -9,5 +9,7 @@ public interface IJWTProvider
 	// Check incomming jwt token ==> if ok return user id from its claims
 	// ? because may be the incomming jwt is not valid
 
-	string? ValidateToken(string token);
+
+	//return user id
+	string? ValidateTokenAndGetUserId(string token);
 }

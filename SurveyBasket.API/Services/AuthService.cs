@@ -1,39 +1,69 @@
-﻿using SurveyBasket.API.Authentication;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Errors;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace SurveyBasket.API.Services;
 
-public class AuthService(UserManager<ApplicationUser> userManager, IJWTProvider jWTProvider) : IAuthService
+public class AuthService(
+	UserManager<ApplicationUser> userManager,
+	SignInManager<ApplicationUser> signInManager,
+	IJWTProvider jWTProvider,
+	ILogger<AuthService> logger) : IAuthService
 {
 	private readonly UserManager<ApplicationUser> _userManager = userManager;
+	private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 	private readonly IJWTProvider _jWTProvider = jWTProvider;
+	private readonly ILogger<AuthService> _logger = logger;
 	private readonly int _refreshTokenExpirayDays = 14;
 
 	public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
 	{
 		// check user by email 
-		var user = await _userManager.FindByEmailAsync(email);
+		//var user = await _userManager.FindByEmailAsync(email);
 
-		if (user == null)
+		//if (user == null)
+		//return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
+
+
+		if (await _userManager.FindByEmailAsync(email) is not { } user) // instead of the above 2 steps 
 			return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
 
-		// check password
-		bool hasPassword = await _userManager.CheckPasswordAsync(user, password);
-		if (!hasPassword)
-			return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
 
 
-		return await HandleAuthResponse(user);
+		#region check password and Confirmation Email Using _signInManager
+
+		//bool hasPassword = await _userManager.CheckPasswordAsync(user, password);
+		//if (!hasPassword)
+		//	return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
+		//if(!user.EmailConfirmed) // this is the check confirmation 1st technique with the userManager , But We Will _signInManager instead 
+		//{
+		//	return Result.Failure<AuthResponse>( UserErrors.EmailNotConfirmed);
+		//}
+		#endregion
+
+		// we will check the password using signIn manager
+		var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+		if (result.Succeeded)
+		{
+			return await HandleAuthResponse(user);
+		}
+
+		// if we reached here that means
+		// 01 - the password is wrong [Invalid Credintials]
+		// 02 - Not Confirmed [email]
+
+		return Result.Failure<AuthResponse>(result.IsNotAllowed ? UserErrors.EmailNotConfirmed : UserErrors.InvalidCredintials);
 	}
+
 
 	// when you dealing with registeration service we have 2 choices
 	// 1 -  Auto-Login : After Register Sent JWT Token To Frontend and Login Without your Interaction 
 	// 2 -  Register => Confirm Email => Login 
 
-
 	// the first way , Learn It For Yourself , We Don't Use It 
-	public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken=default)
+	public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken=default)
 	{
 		// unique email checker 
 		var emailIsExists = await _userManager.Users.AnyAsync(u=>u.Email == request.Email, cancellationToken);
@@ -49,7 +79,16 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJWTProvider 
 
 		if(result.Succeeded)
 		{
-			return await HandleAuthResponse(newUser);
+			// TODO:Generate Code 
+			var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+			code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+			_logger.LogInformation("Email Confirmation Code {code}",code);
+
+
+			// TODO:Send Email
+
+			return Result.Success();
 		}
 
 
@@ -60,7 +99,8 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJWTProvider 
 	public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
 	{
 
-		var userId = _jWTProvider.ValidateToken(token);
+		var userId = _jWTProvider.ValidateTokenAndGetUserId(token);
+
 		if (userId == null)
 			return Result.Failure<AuthResponse>(TokenErrors.InvalidToken);
 
@@ -87,7 +127,7 @@ public class AuthService(UserManager<ApplicationUser> userManager, IJWTProvider 
 
 	public async Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
 	{
-		var userId = _jWTProvider.ValidateToken(token);
+		var userId = _jWTProvider.ValidateTokenAndGetUserId(token);
 		if (userId == null)
 			return Result.Failure<bool>(UserErrors.UserNotFound);
 

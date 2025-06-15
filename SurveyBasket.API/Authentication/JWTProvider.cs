@@ -46,7 +46,7 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 	}
 
 	// validate and retutn the user id if token is ok 
-	public string? ValidateToken(string token)
+	public string? ValidateTokenAndGetUserId(string token)
 	{
 		var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -76,8 +76,6 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 		{ 
 		return null;
 		}
-
-
 
 	}
 }

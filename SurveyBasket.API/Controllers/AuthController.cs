@@ -16,7 +16,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	{
 		var result = await _authService.RegisterAsync(request, cancellationToken);
 
-		return (result.IsSuccess) ? Ok(result.Value) : result.ToProblem();
+		return (result.IsSuccess) ? Ok() : result.ToProblem();
 	}
 
 	[HttpPost("login")]
