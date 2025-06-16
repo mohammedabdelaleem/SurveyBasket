@@ -12,7 +12,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 
-	public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken = default)
+	public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken = default)
 	{
 		var result = await _authService.RegisterAsync(request, cancellationToken);
 
@@ -23,7 +23,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	[HttpPost("confirm-email")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<ActionResult<AuthResponse>> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+	public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
 	{
 		var result = await _authService.ConfirmEmailAsync(request);
 		return (result.IsSuccess) ? Ok() : result.ToProblem();
@@ -32,7 +32,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	[HttpPost("resend-confirmation-email")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<ActionResult<AuthResponse>> ResendEmailConfirmation([FromBody] ResendEmailConfirmationRequest request)
+	public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendEmailConfirmationRequest request)
 	{
 		var result = await _authService.ResendEmailConfirmationAsync(request);
 		return (result.IsSuccess) ? Ok() : result.ToProblem();
@@ -66,7 +66,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 
-	public async Task<ActionResult<AuthResponse>> Revoke([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
+	public async Task<IActionResult> Revoke([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
 	{
 		var authResult = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 		return (authResult.IsSuccess) ? Ok() : authResult.ToProblem();

@@ -81,7 +81,7 @@ public class AuthService(
 
 		if(result.Succeeded)
 		{
-			// TODO:Generate Code 
+			// Generate Code 
 			var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
 			code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
@@ -138,7 +138,7 @@ public class AuthService(
 		if(user.EmailConfirmed)
 			return Result.Failure(UserErrors.DuplicatedConfirmation);
 
-		// TODO:Generate Code 
+		// Generate Code 
 		var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
