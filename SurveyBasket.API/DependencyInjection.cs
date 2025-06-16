@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SurveyBasket.API.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using SurveyBasket.API.Settings;
 
 namespace SurveyBasket.API;
 
@@ -54,6 +55,9 @@ public static class DependencyInjection
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
 		services.AddProblemDetails();
+
+
+		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
 		return services;
 	}
 
