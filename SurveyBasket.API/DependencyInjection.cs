@@ -5,6 +5,8 @@ using SurveyBasket.API.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SurveyBasket.API.Settings;
+using Microsoft.AspNetCore.Identity.UI.Services;
+
 
 namespace SurveyBasket.API;
 
@@ -50,6 +52,7 @@ public static class DependencyInjection
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<IQuestionService, QuestionService>();
 		services.AddScoped<IVoteService, VoteService>();
+		services.AddScoped<IEmailSender, EmailService>();
 		services.AddScoped<IResultService, ResultService>();
 
 
