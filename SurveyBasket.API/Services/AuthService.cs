@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.API.Authentication;
-using SurveyBasket.API.Errors;
+using SurveyBasket.API.Helpers;
 using System.Security.Cryptography;
 using System.Text;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace SurveyBasket.API.Services;
 
@@ -10,12 +12,17 @@ public class AuthService(
 	UserManager<ApplicationUser> userManager,
 	SignInManager<ApplicationUser> signInManager,
 	IJWTProvider jWTProvider,
-	ILogger<AuthService> logger) : IAuthService
+	ILogger<AuthService> logger,
+	IEmailSender emailSender,
+	IHttpContextAccessor httpContextAccessor
+	) : IAuthService
 {
 	private readonly UserManager<ApplicationUser> _userManager = userManager;
 	private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 	private readonly IJWTProvider _jWTProvider = jWTProvider;
 	private readonly ILogger<AuthService> _logger = logger;
+	private readonly IEmailSender _emailSender = emailSender;
+	private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 	private readonly int _refreshTokenExpirayDays = 14;
 
 	public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -74,21 +81,22 @@ public class AuthService(
 			return Result.Failure(UserErrors.DuplicatedEmail);
 
 
-		var newUser = request.Adapt<ApplicationUser>();
-		//newUser.Email = request.Email;	// Adding newConfiguration Mapping
+		var user = request.Adapt<ApplicationUser>();
+		//user.Email = request.Email;	// Adding newConfiguration Mapping
 
-		var result = await _userManager.CreateAsync(newUser, request.Password);
+		var result = await _userManager.CreateAsync(user, request.Password);
 
 		if(result.Succeeded)
 		{
 			// Generate Code 
-			var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 			code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
 			_logger.LogInformation("Email Confirmation Code {code}",code);
 
 
-			// TODO:Send Email
+			// Send Email
+			await SendConfirmationEmail(user, code);
 
 			return Result.Success();
 		}
@@ -145,7 +153,9 @@ public class AuthService(
 		_logger.LogInformation("Email Confirmation Code {code}", code);
 
 
-		// TODO:Send Email
+		// Send Email
+		await SendConfirmationEmail(user, code);
+
 		return Result.Success();
 	}
 
@@ -234,4 +244,26 @@ public class AuthService(
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 	}
 
+	private async Task SendConfirmationEmail(ApplicationUser user , string code)
+	{
+		// may be requests come from specific url [development , production, testing, etc] and you can add them add appsettings 
+		// but here we choose the difficult way
+
+		// dynaic way to know the request url
+		var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+
+		var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation",
+			new Dictionary<string, string> {
+				{"{{name}}", $"{user.FirstName} {user.LastName}"},
+				{"{{action_url}}", $"{origin}/auth/EmailConfirmation?userId={user.Id}&code={code}" },
+				
+				// the path after origin :it's a frontend responsibility => must telling you what is the path after click on the	correct path end user should go on , can send it at headers	  
+				// 2 values which front end need to resend them to me again
+			}
+			);
+
+		await _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket : Email Confirmation ", emailBody);
+
+
+	}
 }
