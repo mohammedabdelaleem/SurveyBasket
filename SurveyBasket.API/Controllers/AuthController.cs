@@ -29,6 +29,16 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 		return (result.IsSuccess) ? Ok() : result.ToProblem();
 	}
 
+	[HttpPost("resend-confirmation-email")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<ActionResult<AuthResponse>> ResendEmailConfirmation([FromBody] ResendEmailConfirmationRequest request)
+	{
+		var result = await _authService.ResendEmailConfirmationAsync(request);
+		return (result.IsSuccess) ? Ok() : result.ToProblem();
+	}
+
+
 	[HttpPost("login")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -58,11 +58,13 @@ public class AuthService(
 	}
 
 
+	#region 2 Ways Registeration
 	// when you dealing with registeration service we have 2 choices
 	// 1 -  Auto-Login : After Register Sent JWT Token To Frontend and Login Without your Interaction 
 	// 2 -  Register => Confirm Email => Login 
 
 	// the first way , Learn It For Yourself , We Don't Use It 
+	#endregion
 	public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken=default)
 	{
 		// unique email checker 
@@ -125,6 +127,26 @@ public class AuthService(
 		var error = result.Errors.First();
 		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 
+	}
+
+
+	public async Task<Result> ResendEmailConfirmationAsync(ResendEmailConfirmationRequest request)
+	{
+		if(await _userManager.FindByEmailAsync(request.Email) is not { }user)
+			return Result.Success(); // here we not telling the truth to the user, may be hacker[confusion]
+
+		if(user.EmailConfirmed)
+			return Result.Failure(UserErrors.DuplicatedConfirmation);
+
+		// TODO:Generate Code 
+		var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+		_logger.LogInformation("Email Confirmation Code {code}", code);
+
+
+		// TODO:Send Email
+		return Result.Success();
 	}
 
 	public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
