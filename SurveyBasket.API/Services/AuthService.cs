@@ -97,6 +97,7 @@ public class AuthService(
 
 			// Send Email
 			await SendConfirmationEmail(user, code);
+		
 
 			return Result.Success();
 		}
@@ -244,6 +245,7 @@ public class AuthService(
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 	}
 
+
 	private async Task SendConfirmationEmail(ApplicationUser user , string code)
 	{
 		// may be requests come from specific url [development , production, testing, etc] and you can add them add appsettings 
@@ -260,7 +262,7 @@ public class AuthService(
 				// the path after origin :it's a frontend responsibility => must telling you what is the path after click on the	correct path end user should go on , can send it at headers	  
 				// 2 values which front end need to resend them to me again
 			}
-			);
+			) ;
 
 		await _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket : Email Confirmation ", emailBody);
 

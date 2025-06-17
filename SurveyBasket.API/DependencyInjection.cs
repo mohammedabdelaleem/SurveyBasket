@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SurveyBasket.API.Settings;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Configuration;
+using Hangfire;
 
 
 namespace SurveyBasket.API;
@@ -61,6 +63,9 @@ public static class DependencyInjection
 
 		services.AddHttpContextAccessor();
 
+		services.AddBackgroundJobsConfig(configuration);
+
+
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
 		return services;
 	}
@@ -111,6 +116,16 @@ public static class DependencyInjection
 	}
 
 
+	private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddHangfire(config => config
+	   .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+		.UseSimpleAssemblyNameTypeSerializer()
+		.UseRecommendedSerializerSettings()
+		.UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+		return services;	
+	}
 	private static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddSingleton<IJWTProvider, JWTProvider>();

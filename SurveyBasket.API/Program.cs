@@ -1,3 +1,4 @@
+using Hangfire;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,9 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseCors();
+
+app.UseHangfireDashboard("/jobs");
+
 
 app.UseSerilogRequestLogging();
 
