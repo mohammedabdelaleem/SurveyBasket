@@ -1,6 +1,4 @@
-﻿using SurveyBasket.API.Contracts.Questions;
-using SurveyBasket.API.Contracts.Votes;
-using System.Linq.Expressions;
+﻿using SurveyBasket.API.Contracts.Votes;
 
 namespace SurveyBasket.API.Services;
 

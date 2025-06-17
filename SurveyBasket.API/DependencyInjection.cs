@@ -8,6 +8,7 @@ using SurveyBasket.API.Settings;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Hangfire;
+using Hangfire.SqlServer;
 
 
 namespace SurveyBasket.API;
@@ -54,16 +55,18 @@ public static class DependencyInjection
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<IQuestionService, QuestionService>();
 		services.AddScoped<IVoteService, VoteService>();
-		services.AddScoped<IEmailSender, EmailService>();
+		services.AddTransient<IEmailSender, EmailService>();
 		services.AddScoped<IResultService, ResultService>();
 
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
 		services.AddProblemDetails();
 
+		services.AddBackgroundJobsConfig(configuration);
+
+
 		services.AddHttpContextAccessor();
 
-		services.AddBackgroundJobsConfig(configuration);
 
 
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
@@ -123,6 +126,8 @@ public static class DependencyInjection
 		.UseSimpleAssemblyNameTypeSerializer()
 		.UseRecommendedSerializerSettings()
 		.UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+		services.AddHangfireServer();
 
 		return services;	
 	}

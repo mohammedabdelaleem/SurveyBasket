@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Helpers;
@@ -94,6 +95,14 @@ public class AuthService(
 
 			_logger.LogInformation("Email Confirmation Code {code}",code);
 
+
+			// you have 2 choices for backgroud job using hangfire 
+			// 01 - Make your Method public 
+					//BackgroundJob.Enqueue(() => SendConfirmationEmail(user, code)); // ensure public
+
+
+			// 02 - Set Job Inside the Method
+		
 
 			// Send Email
 			await SendConfirmationEmail(user, code);
@@ -264,7 +273,10 @@ public class AuthService(
 			}
 			) ;
 
-		await _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket : Email Confirmation ", emailBody);
+		//await _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket : Email Confirmation ", emailBody);
+
+		BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket : Email Confirmation ", emailBody));
+		await Task.CompletedTask;
 
 
 	}
