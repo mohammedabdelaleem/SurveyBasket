@@ -1,4 +1,5 @@
 using Hangfire;
+using HangfireBasicAuthenticationFilter;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,21 @@ app.UseHttpsRedirection();
 
 app.UseCors();
 
-app.UseHangfireDashboard("/jobs");
+app.UseHangfireDashboard("/jobs",
+	new DashboardOptions
+	{
+		Authorization =
+		[
+			new HangfireCustomBasicAuthenticationFilter
+			{
+				// just 2 values no need for class and option pattern
+				User = app.Configuration.GetValue<string>("HangfireSettings:UserName"),
+				Pass = app.Configuration.GetValue<string>("HangfireSettings:Password")
+			}
+			], 
+		DashboardTitle = "Survey Basket Dashboard"
+	}
+	);
 
 
 app.UseSerilogRequestLogging();
