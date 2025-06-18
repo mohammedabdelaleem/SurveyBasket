@@ -5,7 +5,6 @@ using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Helpers;
 using System.Security.Cryptography;
 using System.Text;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace SurveyBasket.API.Services;
 

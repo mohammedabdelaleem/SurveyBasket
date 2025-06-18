@@ -57,7 +57,7 @@ public static class DependencyInjection
 		services.AddScoped<IVoteService, VoteService>();
 		services.AddTransient<IEmailSender, EmailService>();
 		services.AddScoped<IResultService, ResultService>();
-
+		services.AddScoped<INotificationService, NotificationService>();
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
 		services.AddProblemDetails();

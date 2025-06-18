@@ -12,7 +12,9 @@ namespace SurveyBasket.API.Services;
 	It implements the IEmailSender interface from ASP.NET Identity,
 	which is used when sending account confirmation emails, password resets, notifications, etc.
  */
-public class EmailService(IOptions<MailSettings> mailSettings ,ILogger<EmailService> logger) : IEmailSender
+public class EmailService(
+	IOptions<MailSettings> mailSettings ,
+	ILogger<EmailService> logger) : IEmailSender
 {
 	private readonly MailSettings _mailSettings = mailSettings.Value;
 	private readonly ILogger<EmailService> _logger = logger;
