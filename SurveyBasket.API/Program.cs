@@ -22,7 +22,6 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-app.UseCors();
 
 app.UseHangfireDashboard("/jobs",
 	new DashboardOptions
@@ -40,7 +39,14 @@ app.UseHangfireDashboard("/jobs",
 	}
 	);
 
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+var scope = scopeFactory.CreateScope();
+var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
+RecurringJob.AddOrUpdate("SendNewPollsNotification", () => notificationService.SendNewPollsNotification(null) , Cron.Daily); // https://crontab.guru/  
+
+
+app.UseCors();
 app.UseSerilogRequestLogging();
 
 app.UseAuthorization();
