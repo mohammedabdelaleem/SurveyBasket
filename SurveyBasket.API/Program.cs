@@ -37,7 +37,7 @@ app.UseHangfireDashboard("/jobs",
 			}
 			],
 		DashboardTitle = "Survey Basket Dashboard",
-		IsReadOnlyFunc = (DashboardContext context) => true //normal users can't delete or trigger only read
+		//IsReadOnlyFunc = (DashboardContext context) => true //normal users can't delete or trigger only read
 	}
 	);
 

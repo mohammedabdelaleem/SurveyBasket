@@ -1,14 +1,20 @@
 ﻿
 
+using Hangfire;
+
 namespace SurveyBasket.API.Services;
 
-public class PollService(AppDbContext _context) : IPollService
+public class PollService(
+	AppDbContext context,
+	INotificationService notificationService1
+	) : IPollService
 {
-	private readonly AppDbContext context = _context;
+	private readonly AppDbContext _context = context;
+	private readonly INotificationService _notificationService1 = notificationService1;
 
 	public async Task<Result<IEnumerable<PollResponse>>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
-		var polls = await context.Polls
+		var polls = await _context.Polls
 			.AsNoTracking()
 			.ProjectToType<PollResponse>()
 			.ToListAsync(cancellationToken);
@@ -20,7 +26,7 @@ public class PollService(AppDbContext _context) : IPollService
 	public async Task<Result<IEnumerable<PollResponse>>> GetCurrentAsync(CancellationToken cancellationToken = default)
 	{
 		// which polls i can choose to make votes on it ?
-		var polls = await context.Polls
+		var polls = await _context.Polls
 			.Where(p=>p.IsPublished && DateOnly.FromDateTime(DateTime.UtcNow) >= p.StartsAt && DateOnly.FromDateTime(DateTime.UtcNow) <= p.EndsAt )
 			.AsNoTracking()
 			.ProjectToType<PollResponse>()
@@ -32,7 +38,7 @@ public class PollService(AppDbContext _context) : IPollService
 	}
 	public async Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default)
 	{
-		var poll =await context.Polls.FindAsync(id,cancellationToken);
+		var poll =await _context.Polls.FindAsync(id,cancellationToken);
 		return (poll != null) ?
 			Result.Success(poll.Adapt<PollResponse>()) :
 			Result.Failure<PollResponse>(PollErrors.PollNotFound);
@@ -46,8 +52,8 @@ public class PollService(AppDbContext _context) : IPollService
 			return Result.Failure<PollResponse>(PollErrors.DuplicateTitle);
 
 		Poll poll = pollRequest.Adapt<Poll>();
-		await context.Polls.AddAsync(poll, cancellationToken);
-		int numberOfStates=await context.SaveChangesAsync(cancellationToken);
+		await _context.Polls.AddAsync(poll, cancellationToken);
+		int numberOfStates=await _context.SaveChangesAsync(cancellationToken);
 
 		var pollResponse = poll.Adapt<PollResponse>();
 
@@ -63,7 +69,7 @@ public class PollService(AppDbContext _context) : IPollService
 
 
 
-		Poll? pollDB = await context.Polls.FindAsync(id, cancellationToken);
+		Poll? pollDB = await _context.Polls.FindAsync(id, cancellationToken);
 
 		if (pollDB == null)
 			return Result.Failure(PollErrors.PollNotFound);
@@ -72,32 +78,41 @@ public class PollService(AppDbContext _context) : IPollService
 		pollRequest.Adapt<Poll>();
 		pollRequest.Adapt(pollDB);
 
-		await context.SaveChangesAsync(cancellationToken);
+		await _context.SaveChangesAsync(cancellationToken);
 		return Result.Success();
 	}
 	public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default)
 	{
-		var poll = await context.Polls.FindAsync(id, cancellationToken);
+		var poll = await _context.Polls.FindAsync(id, cancellationToken);
 
 		if (poll is null)return Result.Failure(PollErrors.PollNotFound);
 		
-		context.Remove(poll);
+		_context.Remove(poll);
 
-		int numberOfStates = await context.SaveChangesAsync(cancellationToken);
+		int numberOfStates = await _context.SaveChangesAsync(cancellationToken);
 
 		return numberOfStates != 0 ? Result.Success() : Result.Failure(PollErrors.SaveError);
 	}
 
 	public async Task<Result> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default)
 	{
-		Poll? poll = await context.Polls.FindAsync(id, cancellationToken);
+		Poll? poll = await _context.Polls.FindAsync(id, cancellationToken);
 
 		if (poll == null)
 			if (poll == null) return Result.Failure(PollErrors.PollNotFound);
 
 		poll.IsPublished = !poll.IsPublished;
 
-		int numberOfStates = await context.SaveChangesAsync(cancellationToken);
+		int numberOfStates = await _context.SaveChangesAsync(cancellationToken);
+
+		// here we need to send notification when 
+		// date is today and admin change the status 
+
+		if (poll.IsPublished && poll.StartsAt == DateOnly.FromDateTime(DateTime.UtcNow))
+			BackgroundJob.Enqueue(() => _notificationService1.SendNewPollsNotification(poll.Id));
+
+
+
 		return numberOfStates != 0 ? Result.Success() : Result.Failure(PollErrors.SaveError);
 	}
 }
