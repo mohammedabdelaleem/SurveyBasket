@@ -1,4 +1,5 @@
 using Hangfire;
+using Hangfire.Dashboard;
 using HangfireBasicAuthenticationFilter;
 using Serilog;
 
@@ -34,8 +35,9 @@ app.UseHangfireDashboard("/jobs",
 				User = app.Configuration.GetValue<string>("HangfireSettings:UserName"),
 				Pass = app.Configuration.GetValue<string>("HangfireSettings:Password")
 			}
-			], 
-		DashboardTitle = "Survey Basket Dashboard"
+			],
+		DashboardTitle = "Survey Basket Dashboard",
+		IsReadOnlyFunc = (DashboardContext context) => true //normal users can't delete or trigger only read
 	}
 	);
 
