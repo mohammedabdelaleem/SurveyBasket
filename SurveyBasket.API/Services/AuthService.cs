@@ -221,6 +221,26 @@ public class AuthService(
 		return Result.Success();
 	}
 
+	public async Task<Result> SendResetPasswordCodeAsync(string email)
+	{
+		if (await _userManager.FindByEmailAsync(email) is not { } user)
+			return Result.Success();
+
+		// find a user with the incomming email ==> Generate code + send it at email
+
+		// 01 - Generate Code 
+		var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+		_logger.LogInformation("Reset Code :{code}", code);
+
+
+		// 02 - Send Email
+		await SendResetPasswordEmail(user, code);
+
+		return Result.Success();
+	}
+
 	private async Task<Result<AuthResponse>> HandleAuthResponse(ApplicationUser user)
 	{
 		// Generate JWT Token 
@@ -248,12 +268,11 @@ public class AuthService(
 
 		return Result.Success(response);
 	}
+
 	private string GenerateRefreshToken()
 	{
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 	}
-
-
 	private async Task SendConfirmationEmail(ApplicationUser user , string code)
 	{
 		// may be requests come from specific url [development , production, testing, etc] and you can add them add appsettings 
@@ -279,4 +298,32 @@ public class AuthService(
 
 
 	}
+
+	private async Task SendResetPasswordEmail(ApplicationUser user, string code)
+	{
+		// may be requests come from specific url [development , production, testing, etc] and you can add them add appsettings 
+		// but here we choose the difficult way
+
+		// dynaic way to know the request url
+		var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+
+		var emailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword",
+			new Dictionary<string, string> {
+				{"{{name}}", $"{user.FirstName} {user.LastName}"},
+				{"{{action_url}}", $"{origin}/auth/forgetPassword?email={user.Email}&code={code}" },
+				
+				// the path after origin :it's a frontend responsibility => must telling you what is the path after click on the	correct path end user should go on , can send it at headers	  
+				// 2 values which front end need to resend them to me again
+			}
+			);
+
+		//await _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket : Email Confirmation ", emailBody);
+
+		BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket : Change Password ", emailBody));
+		await Task.CompletedTask;
+
+
+	}
+
+
 }

@@ -7,7 +7,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	private readonly IAuthService _authService = authService;
 	private readonly ILogger<AuthController> _logger = logger;
 
-
+		
 	[HttpPost("register")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -69,6 +69,18 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	public async Task<IActionResult> Revoke([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
 	{
 		var authResult = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+		return (authResult.IsSuccess) ? Ok() : authResult.ToProblem();
+	}
+
+
+	[HttpPost("forget-password")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+	public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequset request)
+	{
+		var authResult = await _authService.SendResetPasswordCodeAsync(request.Email);
 		return (authResult.IsSuccess) ? Ok() : authResult.ToProblem();
 	}
 }
