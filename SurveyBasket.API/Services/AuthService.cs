@@ -1,6 +1,7 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json.Linq;
 using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Helpers;
 using System.Security.Cryptography;
@@ -226,7 +227,12 @@ public class AuthService(
 		if (await _userManager.FindByEmailAsync(email) is not { } user)
 			return Result.Success();
 
-		// find a user with the incomming email ==> Generate code + send it at email
+		// find a user with the incomming email ==>
+		 /*
+		   Generate a token
+				Send it via email(or link)
+				When the user clicks the link, they submit the token along with their new password
+		 */
 
 		// 01 - Generate Code 
 		var code = await _userManager.GeneratePasswordResetTokenAsync(user);
