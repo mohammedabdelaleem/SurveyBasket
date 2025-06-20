@@ -83,4 +83,17 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 		var authResult = await _authService.SendResetPasswordCodeAsync(request.Email);
 		return (authResult.IsSuccess) ? Ok() : authResult.ToProblem();
 	}
+
+
+
+	[HttpPost("reset-password")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+	public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+	{
+		var authResult = await _authService.ResetPasswordAsync(request);
+		return (authResult.IsSuccess) ? Ok() : authResult.ToProblem();
+	}
 }
