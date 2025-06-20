@@ -227,6 +227,10 @@ public class AuthService(
 		if (await _userManager.FindByEmailAsync(email) is not { } user)
 			return Result.Success();
 
+		if(!user.EmailConfirmed)
+			return Result.Failure(UserErrors.EmailNotConfirmed);
+
+
 		// find a user with the incomming email ==>
 		 /*
 		   Generate a token
