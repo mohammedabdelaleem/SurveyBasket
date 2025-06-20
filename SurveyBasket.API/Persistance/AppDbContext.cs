@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace SurveyBasket.API.Persistance;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser>(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options,
+	IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser , ApplicationRole, string>(options)
 {
 	private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 

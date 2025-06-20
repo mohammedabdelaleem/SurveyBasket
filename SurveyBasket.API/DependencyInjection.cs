@@ -136,7 +136,7 @@ public static class DependencyInjection
 	{
 		services.AddSingleton<IJWTProvider, JWTProvider>();
 
-		services.AddIdentity<ApplicationUser, IdentityRole>()
+		services.AddIdentity<ApplicationUser, ApplicationRole>()
 			.AddEntityFrameworkStores<AppDbContext>()
 			.AddDefaultTokenProviders();
 

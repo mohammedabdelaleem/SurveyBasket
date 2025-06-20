@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SurveyBasket.API.Persistance;
 
@@ -11,9 +12,11 @@ using SurveyBasket.API.Persistance;
 namespace SurveyBasket.API.Persistance.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250620221643_UpdateRoleTable")]
+    partial class UpdateRoleTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -169,7 +172,7 @@ namespace SurveyBasket.API.Persistance.Migrations
                     b.HasIndex("QuestionId", "Content")
                         .IsUnique();
 
-                    b.ToTable("Answers", (string)null);
+                    b.ToTable("Answers");
                 });
 
             modelBuilder.Entity("SurveyBasket.API.Entities.ApplicationRole", b =>
@@ -329,7 +332,7 @@ namespace SurveyBasket.API.Persistance.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Polls", (string)null);
+                    b.ToTable("Polls");
                 });
 
             modelBuilder.Entity("SurveyBasket.API.Entities.Question", b =>
@@ -373,7 +376,7 @@ namespace SurveyBasket.API.Persistance.Migrations
                     b.HasIndex("PollId", "Content")
                         .IsUnique();
 
-                    b.ToTable("Questions", (string)null);
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("SurveyBasket.API.Entities.Vote", b =>
@@ -401,7 +404,7 @@ namespace SurveyBasket.API.Persistance.Migrations
                     b.HasIndex("PollId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("Votes", (string)null);
+                    b.ToTable("Votes");
                 });
 
             modelBuilder.Entity("SurveyBasket.API.Entities.VoteAnswer", b =>
@@ -430,7 +433,7 @@ namespace SurveyBasket.API.Persistance.Migrations
                     b.HasIndex("VoteId", "QuestionId")
                         .IsUnique();
 
-                    b.ToTable("VoteAnswers", (string)null);
+                    b.ToTable("VoteAnswers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
