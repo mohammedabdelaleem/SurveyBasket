@@ -25,8 +25,8 @@ public class ApplicationUserConfigurations : IEntityTypeConfiguration<Applicatio
 		builder.HasData(new ApplicationUser
 		{
 			Id = DefaultUsers.AdminId,
-			FirstName = "Survey Basket",
-			LastName = "Admin",
+			FirstName = DefaultUsers.AdminFirstName,
+			LastName = DefaultUsers.AdminLastName,
 			Email = DefaultUsers.AdminEmail,
 			NormalizedEmail = DefaultUsers.AdminEmail.ToUpper(),
 			UserName = DefaultUsers.AdminEmail,
