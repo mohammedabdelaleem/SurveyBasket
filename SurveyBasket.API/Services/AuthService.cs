@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json.Linq;
+using SurveyBasket.API.Abstractions.Consts;
 using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Helpers;
 using System.Security.Cryptography;
@@ -139,7 +140,10 @@ public class AuthService(
 		// now we need to confirm email
 		var result = await _userManager.ConfirmEmailAsync(user, code);
 		if (result.Succeeded)
-	   	   return Result.Success();
+	   	   {
+			await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
+			return Result.Success();
+		}
 
 
 		var error = result.Errors.First();
