@@ -99,4 +99,13 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 		return (authResult.IsSuccess) ? Ok() : authResult.ToProblem();
 	}
 
+
+
+	[HttpGet("test")]
+	public IActionResult Test()
+	{
+		var hasher = new PasswordHasher<object>();
+		var hash = hasher.HashPassword(null!, "Pass@123");
+		return Ok(hash);
+	}
 }

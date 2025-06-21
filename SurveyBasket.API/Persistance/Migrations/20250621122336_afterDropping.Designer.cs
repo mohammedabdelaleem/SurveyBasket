@@ -12,8 +12,8 @@ using SurveyBasket.API.Persistance;
 namespace SurveyBasket.API.Persistance.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250604123835_AddQuestionAndAnswerTables")]
-    partial class AddQuestionAndAnswerTables
+    [Migration("20250621122336_afterDropping")]
+    partial class afterDropping
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,33 +24,6 @@ namespace SurveyBasket.API.Persistance.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles", (string)null);
-                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
@@ -75,6 +48,120 @@ namespace SurveyBasket.API.Persistance.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ClaimType = "permission",
+                            ClaimValue = "polls:read",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ClaimType = "permission",
+                            ClaimValue = "polls:add",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ClaimType = "permission",
+                            ClaimValue = "polls:update",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ClaimType = "permission",
+                            ClaimValue = "polls:delete",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ClaimType = "permission",
+                            ClaimValue = "questions:read",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ClaimType = "permission",
+                            ClaimValue = "questions:add",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ClaimType = "permission",
+                            ClaimValue = "questions:update",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ClaimType = "permission",
+                            ClaimValue = "users:read",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            ClaimType = "permission",
+                            ClaimValue = "users:add",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            ClaimType = "permission",
+                            ClaimValue = "users:update",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            ClaimType = "permission",
+                            ClaimValue = "users:delete",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            ClaimType = "permission",
+                            ClaimValue = "roles:read",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            ClaimType = "permission",
+                            ClaimValue = "roles:add",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            ClaimType = "permission",
+                            ClaimValue = "roles:update",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            ClaimType = "permission",
+                            ClaimValue = "roles:delete",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            ClaimType = "permission",
+                            ClaimValue = "results:read",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -137,6 +224,13 @@ namespace SurveyBasket.API.Persistance.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "01978f6e-267c-7c96-b179-d2e08d73f69b",
+                            RoleId = "01979187-c392-77be-89d1-ffe5c2623fae"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -200,6 +294,59 @@ namespace SurveyBasket.API.Persistance.Migrations
                         .IsUnique();
 
                     b.ToTable("Answers");
+                });
+
+            modelBuilder.Entity("SurveyBasket.API.Entities.ApplicationRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "01979187-c392-77be-89d1-ffe5c2623fae",
+                            ConcurrencyStamp = "01979187-c392-77be-89d1-ffe6910b4102",
+                            IsDefault = false,
+                            IsDeleted = false,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "01979187-c392-77be-89d1-ffe7d2df25d4",
+                            ConcurrencyStamp = "01979187-c392-77be-89d1-ffe8850dfea6",
+                            IsDefault = true,
+                            IsDeleted = false,
+                            Name = "Member",
+                            NormalizedName = "MEMBER"
+                        });
                 });
 
             modelBuilder.Entity("SurveyBasket.API.Entities.ApplicationUser", b =>
@@ -275,6 +422,26 @@ namespace SurveyBasket.API.Persistance.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "01978f6e-267c-7c96-b179-d2e08d73f69b",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "01078f6e-267c-7c96-b179-d2e127b3bb2c",
+                            Email = "Admin@survey-basket.com",
+                            EmailConfirmed = true,
+                            FirstName = "Survey Basket",
+                            LastName = "Admin",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@SURVEY-BASKET.COM",
+                            NormalizedUserName = "ADMIN@SURVEY-BASKET.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEOm19rPH9+gX4oopeWRXkyo+gPyFA3OBPZVkNori56HqKq38sCBNntaiBa7n8sADpA==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "35744942C16C49B9B2300A03094FAF85",
+                            TwoFactorEnabled = false,
+                            UserName = "Admin@survey-basket.com"
+                        });
                 });
 
             modelBuilder.Entity("SurveyBasket.API.Entities.Poll", b =>
@@ -373,9 +540,66 @@ namespace SurveyBasket.API.Persistance.Migrations
                     b.ToTable("Questions");
                 });
 
+            modelBuilder.Entity("SurveyBasket.API.Entities.Vote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PollId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubmittedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("PollId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("Votes");
+                });
+
+            modelBuilder.Entity("SurveyBasket.API.Entities.VoteAnswer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VoteId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnswerId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("VoteId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("VoteAnswers");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("SurveyBasket.API.Entities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -402,7 +626,7 @@ namespace SurveyBasket.API.Persistance.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("SurveyBasket.API.Entities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -512,7 +736,7 @@ namespace SurveyBasket.API.Persistance.Migrations
                         .IsRequired();
 
                     b.HasOne("SurveyBasket.API.Entities.Poll", "Poll")
-                        .WithMany("Question")
+                        .WithMany("Questions")
                         .HasForeignKey("PollId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -528,14 +752,69 @@ namespace SurveyBasket.API.Persistance.Migrations
                     b.Navigation("UpdatedBy");
                 });
 
+            modelBuilder.Entity("SurveyBasket.API.Entities.Vote", b =>
+                {
+                    b.HasOne("SurveyBasket.API.Entities.Poll", "Poll")
+                        .WithMany("Votes")
+                        .HasForeignKey("PollId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SurveyBasket.API.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Poll");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SurveyBasket.API.Entities.VoteAnswer", b =>
+                {
+                    b.HasOne("SurveyBasket.API.Entities.Answer", "Answer")
+                        .WithMany()
+                        .HasForeignKey("AnswerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SurveyBasket.API.Entities.Question", "Question")
+                        .WithMany("Votes")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SurveyBasket.API.Entities.Vote", "Vote")
+                        .WithMany("VoteAnswers")
+                        .HasForeignKey("VoteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Answer");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("Vote");
+                });
+
             modelBuilder.Entity("SurveyBasket.API.Entities.Poll", b =>
                 {
-                    b.Navigation("Question");
+                    b.Navigation("Questions");
+
+                    b.Navigation("Votes");
                 });
 
             modelBuilder.Entity("SurveyBasket.API.Entities.Question", b =>
                 {
                     b.Navigation("Answers");
+
+                    b.Navigation("Votes");
+                });
+
+            modelBuilder.Entity("SurveyBasket.API.Entities.Vote", b =>
+                {
+                    b.Navigation("VoteAnswers");
                 });
 #pragma warning restore 612, 618
         }

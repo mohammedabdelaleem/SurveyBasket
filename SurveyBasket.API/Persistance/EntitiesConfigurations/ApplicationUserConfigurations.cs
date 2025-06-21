@@ -1,5 +1,6 @@
 ﻿
 using SurveyBasket.API.Abstractions.Consts;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SurveyBasket.API.Persistance.EntitiesConfigurations;
 
@@ -9,9 +10,10 @@ public class ApplicationUserConfigurations : IEntityTypeConfiguration<Applicatio
 	{
 		builder.Property(x => x.FirstName)
 			.HasMaxLength(100);
-
 		builder.Property(x => x.LastName)
 			.HasMaxLength(100);
+
+
 
 		builder
 			.OwnsMany(x => x.RefreshTokens)
@@ -20,13 +22,12 @@ public class ApplicationUserConfigurations : IEntityTypeConfiguration<Applicatio
 			.HasForeignKey("UserId"); // // instead of ApplicaionUserId
 
 
-		var passwordHasher = new PasswordHasher<ApplicationUser>();
 
 		builder.HasData(new ApplicationUser
 		{
 			Id = DefaultUsers.AdminId,
-			FirstName = DefaultUsers.AdminFirstName,
-			LastName = DefaultUsers.AdminLastName,
+			FirstName = "Survey Basket",
+			LastName = "Admin",
 			Email = DefaultUsers.AdminEmail,
 			NormalizedEmail = DefaultUsers.AdminEmail.ToUpper(),
 			UserName = DefaultUsers.AdminEmail,
@@ -34,7 +35,7 @@ public class ApplicationUserConfigurations : IEntityTypeConfiguration<Applicatio
 			ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
 			SecurityStamp = DefaultUsers.AdminSecurityStamp,
 			EmailConfirmed = true, // don't forget this , We don't need default admin to sign in
-			PasswordHash = passwordHasher.HashPassword(null!, DefaultUsers.AdminPassword) // Null Because We At The User Itself
+			PasswordHash =DefaultUsers.AdminPasswordHash 
 		});
 	}
 }

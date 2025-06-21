@@ -23,7 +23,7 @@ public class RoleClaimConfigurations : IEntityTypeConfiguration<IdentityRoleClai
 		}
 
 		builder.HasData(
-
+			adminClaims
 			);
 	}
 }
