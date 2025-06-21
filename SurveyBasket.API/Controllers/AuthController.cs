@@ -1,4 +1,6 @@
 ﻿
+using SurveyBasket.API.Abstractions.Consts;
+
 namespace SurveyBasket.API.Controllers;
 [Route("[controller]")]
 [ApiController]
@@ -96,4 +98,5 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 		var authResult = await _authService.ResetPasswordAsync(request);
 		return (authResult.IsSuccess) ? Ok() : authResult.ToProblem();
 	}
+
 }

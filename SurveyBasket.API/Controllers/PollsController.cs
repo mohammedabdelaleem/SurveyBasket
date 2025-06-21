@@ -142,7 +142,6 @@ public class PollsController : ControllerBase
 	[HttpDelete("{id}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-
 	public async Task<ActionResult> DeleteAsync([FromRoute] int id, CancellationToken cancellationToken = default)
 	{
 		var result = await pollService.DeleteAsync(id, cancellationToken);
