@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-
+﻿
 namespace SurveyBasket.API.Contracts.Poll;
 
 public class LoginValidator : AbstractValidator<PollRequest>

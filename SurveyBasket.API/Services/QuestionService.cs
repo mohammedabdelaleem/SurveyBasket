@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
 using SurveyBasket.API.Contracts.Questions;
-using System.Collections.Generic;
 
 namespace SurveyBasket.API.Services;
 

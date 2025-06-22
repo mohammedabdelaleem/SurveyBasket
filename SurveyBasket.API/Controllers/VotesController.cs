@@ -1,7 +1,4 @@
-﻿
-
-using SurveyBasket.API.Abstractions.Consts;
-using SurveyBasket.API.Contracts.Votes;
+﻿using SurveyBasket.API.Contracts.Votes;
 
 namespace SurveyBasket.API.Controllers;
 

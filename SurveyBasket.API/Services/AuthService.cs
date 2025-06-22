@@ -1,8 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
-using Newtonsoft.Json.Linq;
-using SurveyBasket.API.Abstractions.Consts;
 using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Helpers;
 using System.Security.Cryptography;

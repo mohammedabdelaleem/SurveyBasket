@@ -1,5 +1,4 @@
-﻿using SurveyBasket.API.Abstractions.Consts;
-
+﻿
 namespace SurveyBasket.API.Contracts.Auth;
 
 public class ResetPasswordRequestValidator : AbstractValidator<ResetPasswordRequest>

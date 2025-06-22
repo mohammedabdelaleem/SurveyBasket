@@ -1,7 +1,4 @@
 ﻿
-using SurveyBasket.API.Abstractions.Consts;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-
 namespace SurveyBasket.API.Persistance.EntitiesConfigurations;
 
 public class ApplicationUserConfigurations : IEntityTypeConfiguration<ApplicationUser>

@@ -1,5 +1,4 @@
 ﻿using SurveyBasket.API.Contracts.Results;
-using System.Linq;
 
 namespace SurveyBasket.API.Services;
 
