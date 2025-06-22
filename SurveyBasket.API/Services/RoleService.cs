@@ -1,4 +1,5 @@
-﻿using SurveyBasket.API.Contracts.Roles;
+﻿using SurveyBasket.API.Abstractions.Consts;
+using SurveyBasket.API.Contracts.Roles;
 
 namespace SurveyBasket.API.Services;
 
@@ -10,16 +11,16 @@ public class RoleService(
 	private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
 	private readonly AppDbContext _context = context;
 
-	public async Task<Result<IEnumerable<RoleResponse>>> GetAllAsync(bool? includeDisabled = false, CancellationToken cancellationToken=default)
+	public async Task<Result<IEnumerable<RoleResponse>>> GetAllAsync(bool? includeDisabled = false, CancellationToken cancellationToken = default)
 	{
-		
-			var roles = await _roleManager.Roles
-			.Where(r => !r.IsDefault &&
-					  (!r.IsDeleted || (includeDisabled.HasValue && includeDisabled.Value)))  // (includeDisabled.HasValue && includeDisabled.Value) ==== (includeDisabled==true)
-			.ProjectToType<RoleResponse>()
-			.ToListAsync(cancellationToken);
 
-			return Result.Success<IEnumerable<RoleResponse>>(roles);
+		var roles = await _roleManager.Roles
+		.Where(r => !r.IsDefault &&
+				  (!r.IsDeleted || (includeDisabled.HasValue && includeDisabled.Value)))  // (includeDisabled.HasValue && includeDisabled.Value) ==== (includeDisabled==true)
+		.ProjectToType<RoleResponse>()
+		.ToListAsync(cancellationToken);
+
+		return Result.Success<IEnumerable<RoleResponse>>(roles);
 	}
 
 
@@ -40,19 +41,19 @@ public class RoleService(
 		return Result.Success(roleDetails);
 	}
 
-	public async Task<Result<RoleDetailsResponse>> AddAsync(RoleRequest request, CancellationToken cancellationToken=default)
+	public async Task<Result<RoleDetailsResponse>> AddAsync(RoleRequest request, CancellationToken cancellationToken = default)
 	{
 
 		// check for Duplicate titles
 		//var roleIsExists = await _roleManager.Roles.AnyAsync(r=>r.Name == request.Name, cancellationToken);
 		var roleIsExists = await _roleManager.RoleExistsAsync(request.Name);
-		if(roleIsExists)
+		if (roleIsExists)
 			return Result.Failure<RoleDetailsResponse>(RoleErrors.RoleDuplicated);
 
 
 		// check for: not allowed permissions xxx
 		var allowedPermissions = Permissions.GetAllPermissions();
-		if(request.Permissions.Except(allowedPermissions).Any())
+		if (request.Permissions.Except(allowedPermissions).Any())
 			return Result.Failure<RoleDetailsResponse>(RoleErrors.InvalidPermissions);
 
 
@@ -64,7 +65,7 @@ public class RoleService(
 
 		var result = await _roleManager.CreateAsync(role);
 
-		if(result.Succeeded)
+		if (result.Succeeded)
 		{
 			// convert from list<string> into list<IdentityRoleClaim<string>>
 			var permissions = request.Permissions
@@ -75,7 +76,7 @@ public class RoleService(
 					RoleId = role.Id
 				});
 
-			await _context.AddRangeAsync(permissions,cancellationToken);
+			await _context.AddRangeAsync(permissions, cancellationToken);
 			await _context.SaveChangesAsync(cancellationToken);
 
 			var roleDetails = new RoleDetailsResponse(
@@ -97,6 +98,62 @@ public class RoleService(
 
 
 
+	public async Task<Result> UpdateAsync(string id, RoleRequest request, CancellationToken cancellationToken = default)
+	{
+
+		if (await _roleManager.FindByIdAsync(id) is not { } role)
+			return Result.Failure<RoleDetailsResponse>(RoleErrors.RoleNotFound);
+
+
+		var roleIsExistsAtAnother = await _roleManager.Roles
+			.AnyAsync(r => r.Name == request.Name && r.Id != id
+			, cancellationToken);
+
+		if (roleIsExistsAtAnother)
+			return Result.Failure<RoleDetailsResponse>(RoleErrors.RoleDuplicated);
+
+		var allowedPermissions = Permissions.GetAllPermissions();
+		if (request.Permissions.Except(allowedPermissions).Any())
+			return Result.Failure<RoleDetailsResponse>(RoleErrors.InvalidPermissions);
+
+		role.Name = request.Name;
+
+		var result = await _roleManager.UpdateAsync(role);
+
+		if (result.Succeeded)
+		{
+			var currentPermissionsAtDb = await _context.RoleClaims
+				.Where(rc => rc.RoleId == role.Id && rc.ClaimType == Permissions.Type)
+				.Select(re => re.ClaimValue)
+				.ToListAsync(cancellationToken);
+
+			var newPermissions = request.Permissions.Except(currentPermissionsAtDb)
+				.Select(p => new IdentityRoleClaim<string>()
+				{
+					ClaimType = Permissions.Type,
+					ClaimValue = p,
+					RoleId = role.Id
+				});
+
+
+			var removedPermissions = currentPermissionsAtDb.Except(request.Permissions);
+
+			await _context.RoleClaims.
+				Where(rc => rc.RoleId == role.Id && removedPermissions.Contains(rc.ClaimValue))
+				.ExecuteDeleteAsync(cancellationToken);
+
+
+			await _context.AddRangeAsync(newPermissions, cancellationToken);  // Permissions has role id , don't wory . add your records 
+			await _context.SaveChangesAsync(cancellationToken);
+
+
+			return Result.Success();
+
+		}
+
+		var error = result.Errors.First();
+		return Result.Failure<RoleDetailsResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+	}
 
 
 

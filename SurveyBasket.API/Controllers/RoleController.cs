@@ -31,4 +31,12 @@ public class RoleController(IRoleService roleService) : ControllerBase
 		var result = await _roleService.AddAsync(request,cancellationToken);
 		return result.IsSuccess ? CreatedAtAction(nameof(Get) , new { id=result.Value.Id}, result.Value) : result.ToProblem();
 	}
+
+	[HttpPut("{id}")]
+	[HasPermission(Permissions.UpdateRole)]
+	public async Task<IActionResult> Update([FromRoute] string id, [FromBody]RoleRequest request, CancellationToken cancellationToken=default)
+	{
+		var result = await _roleService.UpdateAsync(id, request, cancellationToken);
+		return result.IsSuccess ? NoContent() : result.ToProblem();
+	}
 }
