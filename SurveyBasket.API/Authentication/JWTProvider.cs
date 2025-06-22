@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace SurveyBasket.API.Authentication;
 
@@ -11,7 +12,7 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 	private readonly JWTOptions _jwtOptions = jwtOptions.Value;
 	
 
-	public (string token, int expiresIn) GenerateToken(ApplicationUser user)
+	public (string token, int expiresIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles , IEnumerable<string> permissions)
 	{
 
 		// Claims Which Needed From Frontend , Card info 
@@ -21,9 +22,13 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
 			new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
 			new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // prefer to adding with claims 
+			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // prefer to adding with claims ,
+			new Claim(nameof(roles) , JsonSerializer.Serialize(roles), JsonClaimValueTypes.JsonArray),
+			new Claim(nameof(permissions) , JsonSerializer.Serialize(permissions), JsonClaimValueTypes.JsonArray)
 			];
 
+		//new Claim(nameof(roles), string.Join(",", roles)),
+		//	new Claim(nameof(permissions), string.Join(",", permissions)),
 
 		// Key for En/Decoding
 		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));

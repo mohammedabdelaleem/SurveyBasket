@@ -7,11 +7,13 @@ using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Helpers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace SurveyBasket.API.Services;
 
 public class AuthService(
 	UserManager<ApplicationUser> userManager,
+	AppDbContext context,
 	SignInManager<ApplicationUser> signInManager,
 	IJWTProvider jWTProvider,
 	ILogger<AuthService> logger,
@@ -20,6 +22,7 @@ public class AuthService(
 	) : IAuthService
 {
 	private readonly UserManager<ApplicationUser> _userManager = userManager;
+	private readonly AppDbContext _context = context;
 	private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 	private readonly IJWTProvider _jWTProvider = jWTProvider;
 	private readonly ILogger<AuthService> _logger = logger;
@@ -285,10 +288,14 @@ public class AuthService(
 
 
 
-	private async Task<Result<AuthResponse>> HandleAuthResponse(ApplicationUser user)
+	private async Task<Result<AuthResponse>> HandleAuthResponse(ApplicationUser user, CancellationToken cancellationToken=default)
 	{
+
+
+		var (UserRoles, permissions) = await GetUserRolesAndPermissions(user, cancellationToken);
+
 		// Generate JWT Token 
-		var (newToken, expiresIn) = _jWTProvider.GenerateToken(user);
+		var (newToken, expiresIn) = _jWTProvider.GenerateToken(user,UserRoles, permissions);
 
 		// generate refresh token
 		var newRefreshToken = GenerateRefreshToken();
@@ -313,6 +320,34 @@ public class AuthService(
 		return Result.Success(response);
 	}
 
+	private async Task<(IEnumerable<string> UserRoles ,IEnumerable<string> permissions )> GetUserRolesAndPermissions(ApplicationUser user, CancellationToken cancellationToken =default)
+	{
+		var userRoles = await _userManager.GetRolesAsync(user);
+
+		//var permissions = await _context.Roles
+		//		.Join(_context.RoleClaims,
+		//			  role=>role.Id,
+		//			  roleClaim => roleClaim.RoleId,
+		//			  (role,roleClaim)=> new {role , roleClaim })
+		//		.Where(x=>userRoles.Contains(x.role.Name!))
+		//		.Select(x=>x.roleClaim.ClaimValue!)
+		//		.Distinct()
+		//		.ToListAsync(cancellationToken);
+
+
+		// query syntax is a good way with join
+		var permissions = await (
+				from r in _context.Roles
+				join rc in _context.RoleClaims 
+				on r.Id equals rc.RoleId
+				where userRoles.Contains(r.Name!)
+				select rc.ClaimValue!)
+				.Distinct()
+				.ToListAsync(cancellationToken);
+
+		return (userRoles, permissions!);
+	}
+		 
 	private string GenerateRefreshToken()
 	{
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
