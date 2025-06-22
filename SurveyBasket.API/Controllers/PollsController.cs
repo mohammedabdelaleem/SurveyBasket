@@ -18,6 +18,7 @@ public class PollsController : ControllerBase
 	[HttpGet("all")]
 	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[HasPermission(Permissions.GetPolls)]
 	public async Task<ActionResult> GetAll(CancellationToken cancellationToken)
 	{
 		var result = await pollService.GetAllAsync(cancellationToken);
@@ -56,6 +57,7 @@ public class PollsController : ControllerBase
 	[HttpGet("{id}")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[HasPermission(Permissions.GetPolls)]
 	public async Task<ActionResult<Poll>> Get([FromRoute] int id)
 	{
 		var result = await pollService.GetAsync(id);
@@ -66,6 +68,7 @@ public class PollsController : ControllerBase
 
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
+	[HasPermission(Permissions.AddPoll)]
 	public async Task<ActionResult> Add([FromBody] PollRequest poll, CancellationToken cancellationToken=default)
 	{
 
@@ -83,7 +86,7 @@ public class PollsController : ControllerBase
 	[HttpPut("{id}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-
+	[HasPermission(Permissions.UpdatePoll)]
 	public async Task<ActionResult> Update(int id, PollRequest poll, CancellationToken cancellationToken = default)
 	{
 		var result = await pollService.UpdateAsync(id, poll, cancellationToken);
@@ -93,10 +96,12 @@ public class PollsController : ControllerBase
 
 	}
 
+
 	[HttpPatch("{id}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[HasPermission(Permissions.UpdatePoll)]
 	public async Task<ActionResult> PartialUpdate(int id, JsonPatchDocument<PollRequest> patchDTO, CancellationToken cancellationToken = default)
 	{
 		if (patchDTO is null || id <= 0)
@@ -131,6 +136,7 @@ public class PollsController : ControllerBase
 	[HttpPut("{id}/togglePublish")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[HasPermission(Permissions.UpdatePoll)]
 	public async Task<ActionResult> TogglePublish(int id, CancellationToken cancellationToken = default)
 	{
 		var result = await pollService.TogglePublishStatusAsync(id, cancellationToken);
@@ -143,6 +149,7 @@ public class PollsController : ControllerBase
 	[HttpDelete("{id}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[HasPermission(Permissions.DeletePoll)]
 	public async Task<ActionResult> DeleteAsync([FromRoute] int id, CancellationToken cancellationToken = default)
 	{
 		var result = await pollService.DeleteAsync(id, cancellationToken);

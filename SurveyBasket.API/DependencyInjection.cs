@@ -141,6 +141,10 @@ public static class DependencyInjection
 			.AddDefaultTokenProviders();
 
 
+		services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+		services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+
 		// Configurations 
 		//	services.Configure<JWTOptions>(configuration.GetSection(JWTOptions.SectionName));
 		services.AddOptions<JWTOptions>()
