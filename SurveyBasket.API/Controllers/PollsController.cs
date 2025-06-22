@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
+using SurveyBasket.API.Abstractions.Consts;
 
 namespace SurveyBasket.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
 public class PollsController : ControllerBase
 {
 	private readonly IPollService pollService;
@@ -41,6 +41,7 @@ public class PollsController : ControllerBase
 	[HttpGet("current")]
 	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[Authorize(Roles = DefaultRoles.Member)]
 	public async Task<ActionResult> GetCurrent(CancellationToken cancellationToken)
 	{
 		var result = await pollService.GetCurrentAsync(cancellationToken);
