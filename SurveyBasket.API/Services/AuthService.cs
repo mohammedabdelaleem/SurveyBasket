@@ -324,6 +324,8 @@ public class AuthService(
 	{
 		var userRoles = await _userManager.GetRolesAsync(user);
 
+		#region permissins using chain linq methods
+
 		//var permissions = await _context.Roles
 		//		.Join(_context.RoleClaims,
 		//			  role=>role.Id,
@@ -334,6 +336,8 @@ public class AuthService(
 		//		.Distinct()
 		//		.ToListAsync(cancellationToken);
 
+
+		#endregion
 
 		// query syntax is a good way with join
 		var permissions = await (
