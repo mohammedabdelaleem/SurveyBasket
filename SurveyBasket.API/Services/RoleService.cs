@@ -17,4 +17,30 @@ public class RoleService(RoleManager<ApplicationRole> roleManager) : IRoleServic
 
 			return Result.Success<IEnumerable<RoleResponse>>(roles);
 	}
+
+
+	public async Task<Result<RoleDetailsResponse>> GetAsync(string roleId, CancellationToken cancellationToken = default)
+	{
+		if (await _roleManager.FindByIdAsync(roleId) is not { } role)
+			return Result.Failure<RoleDetailsResponse>(RoleErrors.RoleNotFound);
+
+		var permissions = await _roleManager.GetClaimsAsync(role);
+
+		var roleDetails = new RoleDetailsResponse(
+				Id: roleId,
+				Name: role.Name!,
+				IsDeleted: role.IsDeleted,
+				Permissions: permissions.Select(x => x.Value)
+			);
+
+		return Result.Success(roleDetails);
+	}
+
+
+
+
+
+
+
+
 }
