@@ -94,10 +94,6 @@ public class RoleService(
 		return Result.Failure<RoleDetailsResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 	}
 
-
-
-
-
 	public async Task<Result> UpdateAsync(string id, RoleRequest request, CancellationToken cancellationToken = default)
 	{
 
@@ -155,7 +151,16 @@ public class RoleService(
 		return Result.Failure<RoleDetailsResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 	}
 
+	public async Task<Result> ToggleStatusAsync(string id, CancellationToken cancellationToken=default)
+	{
+		if (await _roleManager.FindByIdAsync(id) is not { } role)
+			return Result.Failure<RoleDetailsResponse>(RoleErrors.RoleNotFound);
 
+		role.IsDeleted = !role.IsDeleted;
+		await _roleManager.UpdateAsync(role);
+
+		return Result.Success();
+	}
 
 
 }

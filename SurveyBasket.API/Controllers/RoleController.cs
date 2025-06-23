@@ -39,4 +39,13 @@ public class RoleController(IRoleService roleService) : ControllerBase
 		var result = await _roleService.UpdateAsync(id, request, cancellationToken);
 		return result.IsSuccess ? NoContent() : result.ToProblem();
 	}
+
+
+	[HttpPut("{id}/toggle-status")]
+	[HasPermission(Permissions.UpdateRole)]
+	public async Task<IActionResult> ToggleStatus([FromRoute] string id,  CancellationToken cancellationToken = default)
+	{
+		var result = await _roleService.ToggleStatusAsync(id, cancellationToken);
+		return result.IsSuccess ? NoContent() : result.ToProblem();
+	}
 }
