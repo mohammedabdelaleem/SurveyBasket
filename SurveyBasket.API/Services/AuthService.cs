@@ -40,6 +40,8 @@ public class AuthService(
 		if (await _userManager.FindByEmailAsync(email) is not { } user) // instead of the above 2 steps 
 			return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
 
+		if(user.IsDisabled)
+			return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
 
 
 		#region check password and Confirmation Email Using _signInManager
@@ -188,6 +190,9 @@ public class AuthService(
 		if (user == null)
 			return Result.Failure<AuthResponse>(UserErrors.UserNotFound);
 
+
+		if (user.IsDisabled)
+			return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
 
 
 		var userRefreshToken = user.RefreshTokens.SingleOrDefault(u => u.Token == refreshToken && u.IsActive);

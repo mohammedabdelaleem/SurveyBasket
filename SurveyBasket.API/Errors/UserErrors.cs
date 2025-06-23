@@ -5,6 +5,8 @@ public static class UserErrors
 {
 	public static readonly Error InvalidCredintials = new Error("User.InvalidCredintials", "Invalid Email Or Password", StatusCodes.Status401Unauthorized);
 
+	public static readonly Error DisabledUser = new Error("User.DisabledUser", "Disabled User , Please Contact The Customer Service", StatusCodes.Status401Unauthorized);
+
 	public static readonly Error UserNotFound = new Error("User.NotFound", "User Not Found", StatusCodes.Status404NotFound);
 
 	public static readonly Error RefreshTokenNotFound = new Error("UserRefreshToken.NotFound", "User Don't Have This RefreshToken", StatusCodes.Status404NotFound);
