@@ -188,6 +188,11 @@ public static class DependencyInjection
 			options.SignIn.RequireConfirmedEmail = true;
 			options.User.RequireUniqueEmail = true;
 
+			options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+			options.Lockout.MaxFailedAccessAttempts = 3;
+			options.Lockout.AllowedForNewUsers = true;
+
+
 		});
 
 

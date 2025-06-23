@@ -56,7 +56,7 @@ public class AuthService(
 		#endregion
 
 		// we will check the password using signIn manager
-		var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+		var result = await _signInManager.PasswordSignInAsync(user, password, false, true);
 		if (result.Succeeded)
 		{
 			return await HandleAuthResponse(user);
@@ -66,7 +66,13 @@ public class AuthService(
 		// 01 - the password is wrong [Invalid Credintials]
 		// 02 - Not Confirmed [email]
 
-		return Result.Failure<AuthResponse>(result.IsNotAllowed ? UserErrors.EmailNotConfirmed : UserErrors.InvalidCredintials);
+
+		var error = result.IsNotAllowed ? UserErrors.EmailNotConfirmed :
+				result.IsLockedOut ? UserErrors.LockedUser :
+				UserErrors.InvalidCredintials;
+
+
+		return Result.Failure<AuthResponse>(error);
 	}
 
 
@@ -193,6 +199,10 @@ public class AuthService(
 
 		if (user.IsDisabled)
 			return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
+
+
+		if (user.LockoutEnd > DateTime.UtcNow)
+			return Result.Failure<AuthResponse>(UserErrors.LockedUser);
 
 
 		var userRefreshToken = user.RefreshTokens.SingleOrDefault(u => u.Token == refreshToken && u.IsActive);
