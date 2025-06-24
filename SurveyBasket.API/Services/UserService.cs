@@ -4,9 +4,11 @@ namespace SurveyBasket.API.Services;
 
 public class UserService(
 	UserManager<ApplicationUser> userManager,
+	IRoleService roleService,
 	AppDbContext context) : IUserService
 {
 	private readonly UserManager<ApplicationUser> _userManager = userManager;
+	private readonly IRoleService _roleService = roleService;
 	private readonly AppDbContext _context = context;
 
 	public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default)=>
@@ -57,7 +59,51 @@ public class UserService(
 		return Result.Success(response);
 	}
 
+	public async Task<Result<UserResponse>> AddAsync(CreateUserRequest request , CancellationToken cancellationToken=default)
+	{
+		var EmailIsExists = await _userManager.Users.AnyAsync(u=>u.Email == request.Email, cancellationToken);
+		if(EmailIsExists)	
+			return Result.Failure<UserResponse>(UserErrors.DuplicatedEmail);
 
+		#region get roles using DbConxtext 
+		//var allowedRoles = await context.Roles
+		//	.Select(x => x.Name!).ToListAsync(cancellationToken);
+
+		//if (request.Roles.Except(allowedRoles).Any())
+		//	return Result.Failure<UserResponse>(RoleErrors.InvalidRoles);
+		#endregion
+		
+		var allowedRoles = await _roleService.GetAllAsync(cancellationToken:cancellationToken);
+
+		if (request.Roles.Except(allowedRoles.Select(r=>r.Name)).Any())
+			return Result.Failure<UserResponse>(UserErrors.InvalidRoles);
+
+		var user = request.Adapt<ApplicationUser>();
+
+		var result = await _userManager.CreateAsync(user, request.Password);
+
+		if (result.Succeeded)
+		{
+			await _userManager.AddToRolesAsync(user, request.Roles);
+
+			//var response = new UserResponse
+			//	(
+			//	user.Id,
+			//	user.FirstName,
+			//	user.LastName,
+			//	user.Email!,
+			//	user.IsDisabled,
+			//	request.Roles
+			//	);
+
+			var response = (user, request.Roles).Adapt<UserResponse>();
+			return Result.Success(response);
+		}
+
+		var error = result.Errors.First();
+		return Result.Failure<UserResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+
+	}
 	public async Task<Result<UserProfileResponse>> GetUserProfileAsync(string userId)
 	{
 		//var user = await _userManager.FindByIdAsync(userId); // don't user this technique , it select all columns , use joins & unuseful staff , and we need projection 

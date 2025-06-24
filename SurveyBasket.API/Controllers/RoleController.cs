@@ -12,8 +12,8 @@ public class RoleController(IRoleService roleService) : ControllerBase
 	[HasPermission(Permissions.GetRoles)]
 	public async Task<IActionResult> GetAll([FromQuery] bool includeDisabled,CancellationToken cancellationToken=default)
 	{
-		var result = await _roleService.GetAllAsync(includeDisabled, cancellationToken);
-		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+	
+		return Ok(await _roleService.GetAllAsync(includeDisabled, cancellationToken));
 	}
 
 	[HttpGet("{id}")]

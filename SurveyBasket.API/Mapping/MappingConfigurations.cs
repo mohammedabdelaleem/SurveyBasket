@@ -35,5 +35,13 @@ public class MappingConfigurations : IRegister
 		config.NewConfig<(ApplicationUser user, IList<string> userRoles), UserResponse>()
 			.Map(dest => dest, src => src.user)
 			.Map(dest => dest.Roles, src => src.userRoles);
+
+
+
+		config.NewConfig<CreateUserRequest, ApplicationUser>()
+			.Map(dest => dest.UserName, src => src.Email)
+			.Map(dest => dest.EmailConfirmed, src => true); // we confirmed email directly , we choose the easy way ===> we can ignore password from createUserRequest and send email confirmation then recive the code , email and password then set the password to the confirmed user 
+
+
 	}
 }
