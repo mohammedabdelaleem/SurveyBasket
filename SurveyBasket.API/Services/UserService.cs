@@ -15,10 +15,9 @@ public class UserService(
 			join ur in _context.UserRoles
 			on u.Id equals ur.UserId
 			join r in _context.Roles
-			on ur.RoleId equals r.Id
-			into roles // "Group all the roles for each user into a list, don’t repeat the user for each role."
+			on ur.RoleId equals r.Id into roles // "Group all the roles for each user into a list, don’t repeat the user for each role."
 			where !roles.Any(r => r.Name == DefaultRoles.Member) 
-			select new
+			select new // what data you need from tables  
 			{
 				u.Id,
 				u.FirstName,
@@ -28,7 +27,7 @@ public class UserService(
 				Roles = roles.Select(r => r.Name).ToList()
 			}
 			)
-			.GroupBy(u => new
+			.GroupBy(u => new // grouping for remove duplication
 			{
 				u.Id,
 				u.FirstName,
