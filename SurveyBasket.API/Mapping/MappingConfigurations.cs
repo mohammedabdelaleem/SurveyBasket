@@ -37,11 +37,13 @@ public class MappingConfigurations : IRegister
 			.Map(dest => dest.Roles, src => src.userRoles);
 
 
-
 		config.NewConfig<CreateUserRequest, ApplicationUser>()
 			.Map(dest => dest.UserName, src => src.Email)
 			.Map(dest => dest.EmailConfirmed, src => true); // we confirmed email directly , we choose the easy way ===> we can ignore password from createUserRequest and send email confirmation then recive the code , email and password then set the password to the confirmed user 
 
+		config.NewConfig<UpdateUserRequest, ApplicationUser>()
+			.Map(dest => dest.UserName, src => src.Email)
+			.Map(dest => dest.NormalizedUserName, src => src.Email.ToUpper()); // update need this  
 
 	}
 }

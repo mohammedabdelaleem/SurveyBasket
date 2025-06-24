@@ -10,7 +10,7 @@ public class UsersController(IUserService userService) : ControllerBase
 
 	[HttpGet]
 	[HasPermission(Permissions.GetUsers)]
-	public async Task<IActionResult> GetAll(CancellationToken cancellationToken=default)
+	public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
 	{
 		return Ok(await _userService.GetAllAsync(cancellationToken));
 	}
@@ -25,9 +25,17 @@ public class UsersController(IUserService userService) : ControllerBase
 
 	[HttpPost]
 	[HasPermission(Permissions.AddUser)]
-	public async Task<IActionResult> Add([FromBody] CreateUserRequest request,CancellationToken cancellationToken=default)
+	public async Task<IActionResult> Add([FromBody] CreateUserRequest request, CancellationToken cancellationToken = default)
 	{
 		var result = await _userService.AddAsync(request, cancellationToken);
-		return result.IsSuccess ? CreatedAtAction(nameof(Get), new {result.Value.Id} , result.Value) : result.ToProblem();
+		return result.IsSuccess ? CreatedAtAction(nameof(Get), new { result.Value.Id }, result.Value) : result.ToProblem();
+	}
+
+	[HttpPut("{id}")]
+	[HasPermission(Permissions.UpdateUser)]
+	public async Task<IActionResult> Update([FromRoute] string id,[FromBody] UpdateUserRequest request, CancellationToken cancellationToken = default)
+	{
+		var result = await _userService.UpdateAsync(id,request, cancellationToken);
+		return result.IsSuccess ? NoContent() : result.ToProblem();
 	}
 }
