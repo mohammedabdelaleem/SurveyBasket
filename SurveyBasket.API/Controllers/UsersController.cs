@@ -46,4 +46,12 @@ public class UsersController(IUserService userService) : ControllerBase
 		var result = await _userService.ToggleStatus(id);
 		return result.IsSuccess ? NoContent() : result.ToProblem();
 	}
+
+	[HttpPut("{id}/unlock")]
+	[HasPermission(Permissions.UpdateUser)]
+	public async Task<IActionResult> UnLock([FromRoute] string id)
+	{
+		var result = await _userService.UnLock(id);
+		return result.IsSuccess ? NoContent() : result.ToProblem();
+	}
 }

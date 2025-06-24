@@ -162,6 +162,24 @@ public class UserService(
 		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 	}
 
+	public async Task<Result> UnLock(string id)
+	{
+		if (await _userManager.FindByIdAsync(id) is not { } user)
+			return Result.Failure(UserErrors.UserNotFound);
+
+		//user.LockoutEnd = DateTime.UtcNow;
+		//user.AccessFailedCount = 0;
+		//var result = await _userManager.UpdateAsync(user);
+
+		var result = await _userManager.SetLockoutEndDateAsync(user, null);
+
+		if (result.Succeeded)
+			return Result.Success();
+
+
+		var error = result.Errors.First();
+		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+	}
 	public async Task<Result<UserProfileResponse>> GetUserProfileAsync(string userId)
 	{
 		//var user = await _userManager.FindByIdAsync(userId); // don't user this technique , it select all columns , use joins & unuseful staff , and we need projection 
