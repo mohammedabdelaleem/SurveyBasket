@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
+using SurveyBasket.API.Contracts.Common;
 using SurveyBasket.API.Contracts.Questions;
 
 namespace SurveyBasket.API.Services;
@@ -10,13 +11,13 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 	private readonly ILogger<QuestionService> _logger = logger;
 	private readonly string _chachePrefix = "availableQuestions";
 
-	public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken)
+	public async Task<Result<PaginationList<QuestionResponse>>> GetAllAsync(int pollId, RequestFilters filters, CancellationToken cancellationToken)
 	{
 
 		var pollIsExists = await _context.Polls.AnyAsync(p => p.Id == pollId, cancellationToken);
 
 		if (!pollIsExists)
-			return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+			return Result.Failure<PaginationList<QuestionResponse>>(PollErrors.PollNotFound);
 
 
 		#region EF Tricks
@@ -45,18 +46,15 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 
 		//********using mapster projection****************
-		var questionsAtPollTarget = await _context.Questions
+		var query =  _context.Questions
 				.Where(q => q.PollId == pollId)
 				.Include(q => q.Answers)
 				.ProjectToType<QuestionResponse>()
-				.AsNoTracking()
-				.ToListAsync(cancellationToken);
+				.AsNoTracking();
 
-		if (questionsAtPollTarget.Count == 0)
-			return Result.Failure<IEnumerable<QuestionResponse>>(QuestionErrors.QuestionsEmpty);
+		var response = await PaginationList<QuestionResponse>.CreateAsync(query, filters.PageNumber, filters.PageSize, cancellationToken);
 
-
-		return Result.Success<IEnumerable<QuestionResponse>>(questionsAtPollTarget);
+		return Result.Success(response);
 
 	}
 	public async Task<Result<IEnumerable<QuestionResponse>>> GetAvailableAsync(int pollId, string userId, CancellationToken cancellationToken)
