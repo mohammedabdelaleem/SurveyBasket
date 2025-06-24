@@ -1,4 +1,5 @@
-﻿using SurveyBasket.API.Contracts.Users;
+﻿using SurveyBasket.API.Abstractions.Consts;
+using SurveyBasket.API.Contracts.Users;
 
 namespace SurveyBasket.API.Services;
 
@@ -126,11 +127,11 @@ public class UserService(
 
 		if (result.Succeeded)
 		{
-		// we can use the same approach we used befor 
-		// new roles , removed roles 
-		// but here 
+			// we can use the same approach we used befor 
+			// current permissions, new permissions , removed permissions [there permission has id 1,2,3,...]
+			// but here no id ++ so we can remove all roles assigned to this user from userRoles then add the new roles comming at request
 
-		await _context.UserRoles
+			await _context.UserRoles
 				.Where(ur=>ur.UserId == id)
 				.ExecuteDeleteAsync(cancellationToken);
 
@@ -142,6 +143,23 @@ public class UserService(
 		var error = result.Errors.First();
 		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 
+	}
+
+	public async Task<Result> ToggleStatus(string id)
+	{
+		if (await _userManager.FindByIdAsync(id) is not { } user)
+			return Result.Failure(UserErrors.UserNotFound);
+
+		user.IsDisabled = !user.IsDisabled;
+
+		var result =await _userManager.UpdateAsync(user);
+
+		if (result.Succeeded) 
+		return Result.Success();
+
+
+		var error = result.Errors.First();
+		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 	}
 
 	public async Task<Result<UserProfileResponse>> GetUserProfileAsync(string userId)
