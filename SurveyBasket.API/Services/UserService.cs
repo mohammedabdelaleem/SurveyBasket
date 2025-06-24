@@ -15,7 +15,7 @@ public class UserService(
 			join ur in _context.UserRoles
 			on u.Id equals ur.UserId
 			join r in _context.Roles
-			on ur.RoleId equals r.Id into roles // "Group all the roles for each user into a list, don’t repeat the user for each role."
+			on ur.RoleId equals r.Id into roles // "Group all the roles for each user into a list, don’t repeat the user for each role."  === This is a group join, which creates a list of roles per user.
 			where !roles.Any(r => r.Name == DefaultRoles.Member) 
 			select new // what data you need from tables  
 			{
@@ -44,7 +44,26 @@ public class UserService(
 					u.SelectMany(x => x.Roles)
 			))
 			.ToListAsync(cancellationToken);
-	
+
+	public async Task<Result<UserResponse>> GetAsync(string userId)
+	{
+		if(await _userManager.FindByIdAsync(userId) is not { } user)
+			return Result.Failure<UserResponse>(UserErrors.UserNotFound);
+
+		var userRoles = await _userManager.GetRolesAsync(user);
+
+		var response = new UserResponse(
+			user.Id,
+			user.FirstName,
+			user.LastName,
+			user.Email!,
+			user.IsDisabled,
+			userRoles
+			);
+
+		return Result.Success(response);
+	}
+
 
 	public async Task<Result<UserProfileResponse>> GetUserProfileAsync(string userId)
 	{
