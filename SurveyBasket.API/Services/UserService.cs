@@ -52,14 +52,7 @@ public class UserService(
 
 		var userRoles = await _userManager.GetRolesAsync(user);
 
-		var response = new UserResponse(
-			user.Id,
-			user.FirstName,
-			user.LastName,
-			user.Email!,
-			user.IsDisabled,
-			userRoles
-			);
+		var response = (user, userRoles).Adapt<UserResponse>();
 
 		return Result.Success(response);
 	}

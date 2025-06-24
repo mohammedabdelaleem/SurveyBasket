@@ -2,6 +2,7 @@
 
 using SurveyBasket.API.Contracts.Abswers;
 using SurveyBasket.API.Contracts.Questions;
+using SurveyBasket.API.Contracts.Users;
 
 namespace SurveyBasket.API.Mapping;
 
@@ -29,5 +30,10 @@ public class MappingConfigurations : IRegister
 
 		config.NewConfig<RegisterRequest, ApplicationUser>()
 			.Map(dest => dest.UserName, src => src.Email);
+
+
+		config.NewConfig<(ApplicationUser user, IList<string> userRoles), UserResponse>()
+			.Map(dest => dest, src => src.user)
+			.Map(dest => dest.Roles, src => src.userRoles);
 	}
 }
