@@ -44,10 +44,10 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 		#endregion
 
-
+		
 		//********using mapster projection****************
 		var query =  _context.Questions
-				.Where(q => q.PollId == pollId)
+				.Where(q => q.PollId == pollId && (string.IsNullOrEmpty(filters.SearchValue) || q.Content.Contains(filters.SearchValue)))
 				.Include(q => q.Answers)
 				.ProjectToType<QuestionResponse>()
 				.AsNoTracking();
@@ -120,7 +120,7 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 		var questionResponse = await _context.Questions
 			.Include(q => q.Answers)
-			.Where(q => q.PollId == pollId && q.Id == questionId)
+			.Where(q => q.PollId == pollId && q.Id == questionId )
 			.ProjectToType<QuestionResponse>()
 			.SingleOrDefaultAsync(cancellationToken);
 
