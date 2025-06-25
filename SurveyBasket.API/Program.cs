@@ -61,6 +61,13 @@ app.MapHealthChecks("health" , new HealthCheckOptions
 {
 	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 }
-	);
+);
+
+app.MapHealthChecks("health-check-api", new HealthCheckOptions
+{
+	Predicate = x=>x.Tags.Contains("api"),
+	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+}
+);
 
 app.Run();
