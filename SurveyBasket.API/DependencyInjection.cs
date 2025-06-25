@@ -18,6 +18,8 @@ public static class DependencyInjection
 
 	public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
 	{
+		var constr = configuration.GetConnectionString("DefaultConStr") ??
+		throw new InvalidOperationException("There is no Connection String For The 'DefaultConStr' Key ");
 
 
 		// Add services to the container.
@@ -69,7 +71,11 @@ public static class DependencyInjection
 
 		services.AddHttpContextAccessor();
 
-		
+
+
+		services.AddHealthChecks()
+			.AddSqlServer(name: "Database", connectionString: constr)
+			.AddHangfire(options => { options.MinimumAvailableServers = 1; });
 
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
 		return services;
@@ -117,9 +123,6 @@ public static class DependencyInjection
 			options.UseSqlServer(constr);
 		});
 
-		
-		services.AddHealthChecks()
-			.AddSqlServer(name: "Database", connectionString: constr);
 
 		return services;
 	}
