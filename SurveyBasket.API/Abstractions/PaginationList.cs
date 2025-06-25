@@ -16,4 +16,13 @@ public class PaginationList<T>(List<T> items, int pageNumber, int pageSize, int 
 		return new PaginationList<T>(items, pageNumber, pageSize, count);
 	}
 
+	// for cachig problem at available questions 
+	public static PaginationList<T> Create(IEnumerable<T> source, int pageNumber, int pageSize)
+	{
+		var count = source.Count();
+		var items = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+		return new PaginationList<T>(items,pageNumber, pageSize ,count );
+	}
+
 }

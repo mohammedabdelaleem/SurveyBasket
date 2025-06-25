@@ -1,4 +1,5 @@
-﻿using SurveyBasket.API.Contracts.Votes;
+﻿using SurveyBasket.API.Contracts.Common;
+using SurveyBasket.API.Contracts.Votes;
 
 namespace SurveyBasket.API.Controllers;
 
@@ -11,12 +12,12 @@ public class VotesController(IQuestionService questionService,IVoteService voteS
 	private readonly IVoteService _voteService = voteService;
 
 	[HttpGet]
-	public async Task<IActionResult> Start([FromRoute] int pollId, CancellationToken cancellation=default)
+	public async Task<IActionResult> Start([FromRoute] int pollId, [FromQuery] RequestFilters filters ,CancellationToken cancellation=default)
 	{
 		// Authorized User At HttpContext
 		string userId = User.GetUserId()!;
 
-		var result = await _questionService.GetAvailableAsync(pollId, userId, cancellation);
+		var result = await _questionService.GetAvailableAsync(pollId, userId, filters, cancellation);
 
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}

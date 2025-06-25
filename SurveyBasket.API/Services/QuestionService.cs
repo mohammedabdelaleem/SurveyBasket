@@ -57,7 +57,7 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 		return Result.Success(response);
 
 	}
-	public async Task<Result<IEnumerable<QuestionResponse>>> GetAvailableAsync(int pollId, string userId, CancellationToken cancellationToken)
+	public async Task<Result<PaginationList<QuestionResponse>>> GetAvailableAsync(int pollId, string userId,RequestFilters filters, CancellationToken cancellationToken)
 	{
 
 		var pollIsExists = await _context.Polls.AnyAsync(p => p.Id == pollId &&
@@ -67,17 +67,17 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 			cancellationToken);
 
 		if (!pollIsExists)
-			return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+			return Result.Failure<PaginationList<QuestionResponse>>(PollErrors.PollNotFound);
 
 
 		var userIsExists = await _context.Users.AnyAsync(u => u.Id == userId, cancellationToken);
 		if (!userIsExists)
-			return Result.Failure<IEnumerable<QuestionResponse>>(UserErrors.UserNotFound);
+			return Result.Failure<PaginationList<QuestionResponse>>(UserErrors.UserNotFound);
 
 
 		var isVoted = await _context.Votes.AnyAsync(v => v.PollId == pollId && v.UserId == userId, cancellationToken);
 		if (isVoted)
-			return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.DuplicateVote);
+			return Result.Failure<PaginationList<QuestionResponse>>(VoteErrors.DuplicateVote);
 
 
 		// Distributed Caching 
@@ -98,11 +98,13 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 				return result;
 			},
-	cancellationToken: cancellationToken);
+			cancellationToken: cancellationToken);
 
+		// get the data from cache then pagination
+		// Now paginate manually (since already in memory)
+		var paginated = PaginationList<QuestionResponse>.Create(availabeQuestions, filters.PageNumber, filters.PageSize);
 
-
-		return Result.Success(availabeQuestions);
+		return Result.Success(paginated);
 
 	}
 	public async Task<Result<QuestionResponse>> GetAsync(int pollId, int questionId, CancellationToken cancellationToken)
