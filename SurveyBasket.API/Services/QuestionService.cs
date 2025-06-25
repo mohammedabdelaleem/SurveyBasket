@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
 using SurveyBasket.API.Contracts.Common;
 using SurveyBasket.API.Contracts.Questions;
-using SurveyBasket.API.Entities;
+using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.API.Services;
 
@@ -45,19 +45,29 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 		#endregion
 
-		
-		//********using mapster projection****************
-		var query =  _context.Questions
-				.Where(q => q.PollId == pollId && (string.IsNullOrEmpty(filters.SearchValue) || q.Content.Contains(filters.SearchValue)))
-				.Include(q => q.Answers)
-				.ProjectToType<QuestionResponse>()
-				.AsNoTracking();
 
-		var response = await PaginationList<QuestionResponse>.CreateAsync(query, filters.PageNumber, filters.PageSize, cancellationToken);
+		//********using mapster projection****************
+		var query = _context.Questions
+				.Where(q => q.PollId == pollId);
+
+
+		if (!string.IsNullOrEmpty(filters.SearchValue))
+			query = query.Where(q => q.Content.Contains(filters.SearchValue));
+
+
+		var source = query
+						.OrderBy($"{filters.SortColumn} {filters.SortDirection}")
+						.Include(q => q.Answers)
+						.ProjectToType<QuestionResponse>()
+						.AsNoTracking();
+
+		var response = await PaginationList<QuestionResponse>.CreateAsync(source, filters.PageNumber, filters.PageSize, cancellationToken);
 
 		return Result.Success(response);
 
 	}
+	
+	
 	public async Task<Result<PaginationList<QuestionResponse>>> GetAvailableAsync(int pollId, string userId,RequestFilters filters, CancellationToken cancellationToken)
 	{
 
@@ -157,7 +167,7 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 		await _context.AddAsync(question, cancellationToken);
 		await _context.SaveChangesAsync(cancellationToken);
-
+		
 		await _hybridCache.RemoveAsync($"{_chachePrefix}-{pollId}", cancellationToken);
 
 		return Result.Success(question.Adapt<QuestionResponse>());
