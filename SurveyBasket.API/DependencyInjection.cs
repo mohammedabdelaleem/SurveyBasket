@@ -69,8 +69,7 @@ public static class DependencyInjection
 
 		services.AddHttpContextAccessor();
 
-		services.AddHealthChecks()
-			.AddDbContextCheck<AppDbContext>(name:"Database");
+		
 
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
 		return services;
@@ -117,6 +116,10 @@ public static class DependencyInjection
 		{
 			options.UseSqlServer(constr);
 		});
+
+		
+		services.AddHealthChecks()
+			.AddSqlServer(name: "Database", connectionString: constr);
 
 		return services;
 	}
