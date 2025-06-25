@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
 using SurveyBasket.API.Contracts.Common;
 using SurveyBasket.API.Contracts.Questions;
+using SurveyBasket.API.Entities;
 
 namespace SurveyBasket.API.Services;
 
@@ -102,10 +103,11 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 		// get the data from cache then pagination
 		// Now paginate manually (since already in memory)
-		var paginated = PaginationList<QuestionResponse>.Create(availabeQuestions, filters.PageNumber, filters.PageSize);
+		var paginated = PaginationList<QuestionResponse>.Create(
+				availabeQuestions.Where(q=> string.IsNullOrEmpty(filters.SearchValue) || q.Content.ToLower().Contains(filters.SearchValue.ToLower())), 
+				filters.PageNumber, filters.PageSize);
 
 		return Result.Success(paginated);
-
 	}
 	public async Task<Result<QuestionResponse>> GetAsync(int pollId, int questionId, CancellationToken cancellationToken)
 	{
@@ -120,7 +122,7 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 		var questionResponse = await _context.Questions
 			.Include(q => q.Answers)
-			.Where(q => q.PollId == pollId && q.Id == questionId )
+			.Where(q => q.PollId == pollId )
 			.ProjectToType<QuestionResponse>()
 			.SingleOrDefaultAsync(cancellationToken);
 
