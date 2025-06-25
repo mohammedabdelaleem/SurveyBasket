@@ -75,7 +75,8 @@ public static class DependencyInjection
 
 		services.AddHealthChecks()
 			.AddSqlServer(name: "Database", connectionString: constr)
-			.AddHangfire(options => { options.MinimumAvailableServers = 1; });
+			.AddHangfire(options => { options.MinimumAvailableServers = 1; })
+			.AddUrlGroup(name: "External API" , uri: new Uri("https://www.google.com"));
 
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
 		return services;
