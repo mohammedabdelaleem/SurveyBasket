@@ -5,6 +5,7 @@ using SurveyBasket.API.Abstractions.Consts;
 namespace SurveyBasket.API.Controllers;
 [Route("[controller]")]
 [ApiController]
+[EnableRateLimiting("ipLimit")]
 public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 {
 	private readonly IAuthService _authService = authService;
@@ -14,7 +15,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	[HttpPost("register")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-
+	[DisableRateLimiting]
 	public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken = default)
 	{
 		var result = await _authService.RegisterAsync(request, cancellationToken);
