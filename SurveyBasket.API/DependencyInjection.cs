@@ -86,16 +86,28 @@ public static class DependencyInjection
 
 
 
-
 		services.AddRateLimiter(rateLimiterOptions =>
 		{
+			//rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+			//rateLimiterOptions.AddConcurrencyLimiter("concurrency", options =>
+			//{
+			//	options.PermitLimit = 1;
+			//	options.QueueLimit = 2;
+			//	options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			//});
+
+
 			rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-			rateLimiterOptions.AddConcurrencyLimiter("concurrency", options =>
+			rateLimiterOptions.AddTokenBucketLimiter("token", options =>
 			{
-				options.PermitLimit = 1;
+				options.TokenLimit = 10;
 				options.QueueLimit = 2;
 				options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-			}); 
+				options.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
+				options.TokensPerPeriod = 2;
+				options.AutoReplenishment = true;
+			});
+
 		});
 	
 		return services;
