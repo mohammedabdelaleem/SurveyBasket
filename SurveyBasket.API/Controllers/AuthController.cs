@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.RateLimiting;
 using SurveyBasket.API.Abstractions.Consts;
 
 namespace SurveyBasket.API.Controllers;
@@ -102,10 +103,12 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 
 
 	[HttpGet("test")]
+	[EnableRateLimiting("concurrency")] 
 	public IActionResult Test()
 	{
-		var hasher = new PasswordHasher<object>();
-		var hash = hasher.HashPassword(null!, "Pass@123");
-		return Ok(hash);
+		Thread.Sleep(6000);
+		return Ok();
 	}
+
+
 }

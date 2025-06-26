@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Hangfire;
 using Hangfire.SqlServer;
 using SurveyBasket.API.Health;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 
 namespace SurveyBasket.API;
@@ -72,6 +74,7 @@ public static class DependencyInjection
 
 		services.AddHttpContextAccessor();
 
+		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
 
 
 		services.AddHealthChecks()
@@ -81,7 +84,20 @@ public static class DependencyInjection
 			.AddUrlGroup(name: "Facebook API", uri: new Uri("https://www.Facebook.com"), tags: ["api"], httpMethod: HttpMethod.Get)
 			.AddCheck< MailProviderHealthChecks>(name:"email provider health check");
 
-		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
+
+
+
+		services.AddRateLimiter(rateLimiterOptions =>
+		{
+			rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+			rateLimiterOptions.AddConcurrencyLimiter("concurrency", options =>
+			{
+				options.PermitLimit = 1;
+				options.QueueLimit = 2;
+				options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			}); 
+		});
+	
 		return services;
 	}
 
