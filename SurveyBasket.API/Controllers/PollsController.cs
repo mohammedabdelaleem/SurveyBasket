@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.RateLimiting;
 
 
 namespace SurveyBasket.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+[ApiVersion(1)]
+[ApiVersion(2)]
+
 public class PollsController : ControllerBase
 {
 	private readonly IPollService pollService;
@@ -40,20 +44,40 @@ public class PollsController : ControllerBase
 
 	}
 
+
+	[MapToApiVersion(1)]
 	[HttpGet("current")]
 	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[Authorize(Roles = DefaultRoles.Member)]
 	[EnableRateLimiting(RateLimiterInfo.IpAddressPolicy)]
-	public async Task<ActionResult> GetCurrent(CancellationToken cancellationToken)
+	public async Task<ActionResult> GetCurrentV1(CancellationToken cancellationToken)
 	{
-		var result = await pollService.GetCurrentAsync(cancellationToken);
+		var result = await pollService.GetCurrentAsyncV1(cancellationToken);
 
 		return (result.IsFailure) ?
 			result.ToProblem()
 			: Ok(result.Value);
 
 	}
+
+
+	[MapToApiVersion(2)]
+	[HttpGet("current")]
+	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[Authorize(Roles = DefaultRoles.Member)]
+	[EnableRateLimiting(RateLimiterInfo.IpAddressPolicy)]
+	public async Task<ActionResult> GetCurrentV2(CancellationToken cancellationToken)
+	{
+		var result = await pollService.GetCurrentAsyncV2(cancellationToken);
+
+		return (result.IsFailure) ?
+			result.ToProblem()
+			: Ok(result.Value);
+
+	}
+
 
 
 	[HttpGet("{id}")]

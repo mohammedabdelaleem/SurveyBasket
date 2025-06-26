@@ -22,7 +22,7 @@ public class PollService(
 			Result.Success<IEnumerable<PollResponse>>(polls) :
 			Result.Failure<IEnumerable<PollResponse>>(PollErrors.PollsEmpty);
 	}
-	public async Task<Result<IEnumerable<PollResponse>>> GetCurrentAsync(CancellationToken cancellationToken = default)
+	public async Task<Result<IEnumerable<PollResponse>>> GetCurrentAsyncV1(CancellationToken cancellationToken = default)
 	{
 		// which polls i can choose to make votes on it ?
 		var polls = await _context.Polls
@@ -35,6 +35,22 @@ public class PollService(
 			Result.Success<IEnumerable<PollResponse>>(polls) :
 			Result.Failure<IEnumerable<PollResponse>>(PollErrors.PollsEmpty);
 	}
+
+
+	public async Task<Result<IEnumerable<PollResponseV2>>> GetCurrentAsyncV2(CancellationToken cancellationToken = default)
+	{
+		// which polls i can choose to make votes on it ?
+		var polls = await _context.Polls
+			.Where(p => p.IsPublished && DateOnly.FromDateTime(DateTime.UtcNow) >= p.StartsAt && DateOnly.FromDateTime(DateTime.UtcNow) <= p.EndsAt)
+			.AsNoTracking()
+			.ProjectToType<PollResponseV2>()
+			.ToListAsync(cancellationToken);
+
+		return (polls.Count() > 0) ?
+			Result.Success<IEnumerable<PollResponseV2>>(polls) :
+			Result.Failure<IEnumerable<PollResponseV2>>(PollErrors.PollsEmpty);
+	}
+
 	public async Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default)
 	{
 		var poll =await _context.Polls.FindAsync(id,cancellationToken);

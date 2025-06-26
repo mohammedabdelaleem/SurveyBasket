@@ -6,12 +6,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SurveyBasket.API.Settings;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
 using Hangfire;
-using Hangfire.SqlServer;
 using SurveyBasket.API.Health;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Asp.Versioning;
 
 
 namespace SurveyBasket.API;
@@ -86,7 +85,21 @@ public static class DependencyInjection
 
 		services.AddRateLimiterConfig();
 
-	
+
+		services.AddApiVersioning(options =>
+		{
+			options.DefaultApiVersion = new ApiVersion(1);
+			options.AssumeDefaultVersionWhenUnspecified = true;
+			options.ReportApiVersions = true;
+
+			options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+		})
+			.AddApiExplorer(options =>
+			{
+				options.GroupNameFormat = "'v'V";
+				options.SubstituteApiVersionInUrl = true;
+			});
+
 	
 		return services;
 	}
