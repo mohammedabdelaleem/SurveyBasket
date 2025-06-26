@@ -88,7 +88,8 @@ public static class DependencyInjection
 
 		services.AddRateLimiter(rateLimiterOptions =>
 		{
-			//rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+			rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
 			//rateLimiterOptions.AddConcurrencyLimiter("concurrency", options =>
 			//{
 			//	options.PermitLimit = 1;
@@ -97,16 +98,25 @@ public static class DependencyInjection
 			//});
 
 
-			rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-			rateLimiterOptions.AddTokenBucketLimiter("token", options =>
+			//rateLimiterOptions.AddTokenBucketLimiter("token", options =>
+			//{
+			//	options.TokenLimit = 10;
+			//	options.QueueLimit = 2;
+			//	options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			//	options.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
+			//	options.TokensPerPeriod = 2;
+			//	options.AutoReplenishment = true;
+			//});
+
+
+			rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
 			{
-				options.TokenLimit = 10;
-				options.QueueLimit = 2;
+				options.PermitLimit = 100;
+				options.Window = TimeSpan.FromHours(2);
+				options.QueueLimit = 100;
 				options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-				options.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
-				options.TokensPerPeriod = 2;
-				options.AutoReplenishment = true;
 			});
+
 
 		});
 	
