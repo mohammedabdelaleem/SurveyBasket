@@ -1,11 +1,13 @@
 ﻿
 using Microsoft.AspNetCore.RateLimiting;
 using SurveyBasket.API.Abstractions.Consts;
+using System.Linq.Expressions;
+using System.Reflection.Metadata;
 
 namespace SurveyBasket.API.Controllers;
 [Route("[controller]")]
 [ApiController]
-[EnableRateLimiting("ipLimit")]
+[EnableRateLimiting(RateLimiterInfo.IpAddressPolicy)]
 public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 {
 	private readonly IAuthService _authService = authService;
@@ -104,7 +106,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 
 
 	[HttpGet("test")]
-	[EnableRateLimiting("concurrency")] 
+	[EnableRateLimiting(RateLimiterInfo.ConcurrenncyPolicy)] 
 	public IActionResult Test()
 	{
 		Thread.Sleep(6000);
