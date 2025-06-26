@@ -109,14 +109,23 @@ public static class DependencyInjection
 			//});
 
 
-			rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
+			//rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
+			//{
+			//	options.PermitLimit = 100;
+			//	options.Window = TimeSpan.FromHours(2);
+			//	options.QueueLimit = 100;
+			//	options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			//});
+
+
+			rateLimiterOptions.AddSlidingWindowLimiter("sliding", options =>
 			{
 				options.PermitLimit = 100;
 				options.Window = TimeSpan.FromHours(2);
+				options.SegmentsPerWindow = 2;
 				options.QueueLimit = 100;
 				options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
 			});
-
 
 		});
 	
