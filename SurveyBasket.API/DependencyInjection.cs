@@ -134,9 +134,20 @@ public static class DependencyInjection
 				factory: _ => new FixedWindowRateLimiterOptions
 				{
 					PermitLimit = 10,
-					Window = TimeSpan.FromSeconds(	30),
+					Window = TimeSpan.FromSeconds(30),
 				}
 				));
+
+
+			rateLimiterOptions.AddPolicy("userLimit", httpContext =>
+			RateLimitPartition.GetFixedWindowLimiter(
+			partitionKey: httpContext.User.GetUserId(),
+			factory: _ => new FixedWindowRateLimiterOptions
+			{
+				PermitLimit = 10,
+				Window = TimeSpan.FromSeconds(30),
+			}
+			));
 
 		});
 	

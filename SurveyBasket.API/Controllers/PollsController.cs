@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.RateLimiting;
 
 
 namespace SurveyBasket.API.Controllers;
@@ -43,6 +44,7 @@ public class PollsController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status200OK)] // ProducesResponseType to prevent Undocumented Endpoint
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[Authorize(Roles = DefaultRoles.Member)]
+	[EnableRateLimiting("userLimit")]
 	public async Task<ActionResult> GetCurrent(CancellationToken cancellationToken)
 	{
 		var result = await pollService.GetCurrentAsync(cancellationToken);
