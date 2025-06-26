@@ -1,9 +1,14 @@
 ﻿
 
+using Asp.Versioning;
+
 namespace SurveyBasket.API.Controllers;
 [Route("api/polls/{pollId}/[controller]")]
 [ApiController]
 [HasPermission(Permissions.Results)]
+[ApiVersion(1, Deprecated = true)]
+[ApiVersion(2)]
+
 public class ResultsController(IResultService resultService) : ControllerBase
 {
 	private readonly IResultService _resultService = resultService;

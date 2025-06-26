@@ -1,12 +1,12 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.RateLimiting;
-
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace SurveyBasket.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-[ApiVersion(1)]
+[ApiVersion(1, Deprecated =true)]
 [ApiVersion(2)]
 
 public class PollsController : ControllerBase
@@ -51,6 +51,7 @@ public class PollsController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[Authorize(Roles = DefaultRoles.Member)]
 	[EnableRateLimiting(RateLimiterInfo.IpAddressPolicy)]
+	[SwaggerIgnore]
 	public async Task<ActionResult> GetCurrentV1(CancellationToken cancellationToken)
 	{
 		var result = await pollService.GetCurrentAsyncV1(cancellationToken);

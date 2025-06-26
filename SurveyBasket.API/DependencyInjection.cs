@@ -11,6 +11,8 @@ using SurveyBasket.API.Health;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Asp.Versioning;
+using SurveyBasket.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 
 namespace SurveyBasket.API;
@@ -108,7 +110,33 @@ public static class DependencyInjection
 	{
 
 		services.AddEndpointsApiExplorer();
-		services.AddSwaggerGen();
+		services.AddSwaggerGen(options =>
+		{
+			//options.SwaggerDoc("v1", new OpenApiInfo
+			//{
+			//    Version = "v1",
+			//    Title = "ToDo API",
+			//    Description = "An ASP.NET Core Web API for managing ToDo items",
+			//    TermsOfService = new Uri("https://example.com/terms"),
+			//    Contact = new OpenApiContact
+			//    {
+			//        Name = "Example Contact",
+			//        Url = new Uri("https://example.com/contact")
+			//    },
+			//    License = new OpenApiLicense
+			//    {
+			//        Name = "Example License",
+			//        Url = new Uri("https://example.com/license")
+			//    }
+			//});
+
+			var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+			options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
+			options.OperationFilter<SwaggerDefaultValues>();
+		});
+
+		services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
 		return services;
 

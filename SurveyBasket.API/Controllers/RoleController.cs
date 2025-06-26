@@ -1,9 +1,13 @@
-﻿using SurveyBasket.API.Contracts.Roles;
+﻿using Asp.Versioning;
+using SurveyBasket.API.Contracts.Roles;
 
 namespace SurveyBasket.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[ApiVersion(1, Deprecated = true)]
+[ApiVersion(2)]
+
 public class RoleController(IRoleService roleService) : ControllerBase
 {
 	private readonly IRoleService _roleService = roleService;

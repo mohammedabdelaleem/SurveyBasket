@@ -1,4 +1,5 @@
 ﻿
+using Asp.Versioning;
 using SurveyBasket.API.Contracts.Users;
 
 namespace SurveyBasket.API.Controllers;
@@ -6,6 +7,9 @@ namespace SurveyBasket.API.Controllers;
 [Route("me")]
 [ApiController]
 [Authorize]
+[ApiVersion(1, Deprecated = true)]
+[ApiVersion(2)]
+
 public class AccountController(IUserService userService) : ControllerBase
 {
 	private readonly IUserService _userService = userService;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.RateLimiting;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.RateLimiting;
 using SurveyBasket.API.Contracts.Common;
 using SurveyBasket.API.Contracts.Votes;
 
@@ -8,6 +9,9 @@ namespace SurveyBasket.API.Controllers;
 [ApiController]
 [Authorize(Roles = DefaultRoles.Member)]
 [EnableRateLimiting(RateLimiterInfo.UserAddressPolicy)]
+[ApiVersion(1, Deprecated = true)]
+[ApiVersion(2)]
+
 public class VotesController(IQuestionService questionService,IVoteService voteService) : ControllerBase
 {
 	private readonly IQuestionService _questionService = questionService;

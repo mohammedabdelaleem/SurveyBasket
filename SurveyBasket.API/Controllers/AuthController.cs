@@ -1,4 +1,5 @@
 ﻿
+using Asp.Versioning;
 using Microsoft.AspNetCore.RateLimiting;
 using SurveyBasket.API.Abstractions.Consts;
 using System.Linq.Expressions;
@@ -8,6 +9,9 @@ namespace SurveyBasket.API.Controllers;
 [Route("[controller]")]
 [ApiController]
 [EnableRateLimiting(RateLimiterInfo.IpAddressPolicy)]
+[ApiVersion(1, Deprecated = true)]
+[ApiVersion(2)]
+
 public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 {
 	private readonly IAuthService _authService = authService;
