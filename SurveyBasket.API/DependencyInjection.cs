@@ -11,6 +11,8 @@ using SurveyBasket.API.Health;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Asp.Versioning;
+using SurveyBasket.API.OpenApiTransformers;
+using Asp.Versioning.ApiExplorer;
 
 namespace SurveyBasket.API;
 
@@ -100,7 +102,25 @@ public static class DependencyInjection
 			});
 
 
-		services.AddEndpointsApiExplorer();
+		services
+			.AddEndpointsApiExplorer()
+			.AddOpenApiServices();
+
+		return services;
+	}
+	private static IServiceCollection AddOpenApiServices(this IServiceCollection services)
+	{
+		var serviceProvider = services.BuildServiceProvider();
+		var apiVersionDescriptionProvider = serviceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
+
+		foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+		{
+			services.AddOpenApi(description.GroupName, options =>
+			{
+				options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+				options.AddDocumentTransformer(new ApiVersioningTransformer(description));
+			});
+		}
 
 		return services;
 	}

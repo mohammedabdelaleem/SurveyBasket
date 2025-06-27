@@ -3,6 +3,7 @@ using HangfireBasicAuthenticationFilter;
 using Serilog;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -18,6 +19,10 @@ var app = builder.Build();
 //Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+	app.MapOpenApi();
+
+	app.MapScalarApiReference();
+
 	//app.UseSwagger();
 	//app.UseSwaggerUI(options =>
 	//{
