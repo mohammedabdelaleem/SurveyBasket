@@ -112,7 +112,7 @@ public class PollsController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[HasPermission(Permissions.UpdatePoll)]
-	public async Task<ActionResult> Update(int id, PollRequest poll, CancellationToken cancellationToken = default)
+	public async Task<ActionResult> Update([FromRoute]int id, [FromBody] PollRequest poll, CancellationToken cancellationToken = default)
 	{
 		var result = await pollService.UpdateAsync(id, poll, cancellationToken);
 

@@ -90,8 +90,7 @@ public class PollService(
 			return Result.Failure(PollErrors.PollNotFound);
 
 		// Update Fields
-		pollRequest.Adapt<Poll>();
-		pollRequest.Adapt(pollDB);
+		pollDB = pollRequest.Adapt(pollDB);
 
 		await _context.SaveChangesAsync(cancellationToken);
 		return Result.Success();
@@ -131,3 +130,5 @@ public class PollService(
 		return numberOfStates != 0 ? Result.Success() : Result.Failure(PollErrors.SaveError);
 	}
 }
+
+
