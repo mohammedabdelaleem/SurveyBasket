@@ -1,6 +1,4 @@
-﻿using SurveyBasket.API.Abstractions.Consts;
-
-namespace SurveyBasket.API.Contracts.Auth;
+﻿namespace SurveyBasket.API.Contracts.Auth;
 
 public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 {
@@ -9,7 +7,7 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 		RuleFor(x => x.Email)
 			.NotEmpty()
 			.EmailAddress();
-			//.MustAsync; // we can check if any email at db has the same incomming email at db to apply uniquness 
+		//.MustAsync; // we can check if any email at db has the same incomming email at db to apply uniquness 
 
 
 		RuleFor(x => x.Password)
@@ -19,7 +17,7 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 
 		RuleFor(x => x.FirstName)
 			.NotEmpty()
-			.Length(3,100); // look at DB to prevent the trancation 
+			.Length(3, 100); // look at DB to prevent the trancation 
 
 		RuleFor(x => x.LastName)
 			.NotEmpty()

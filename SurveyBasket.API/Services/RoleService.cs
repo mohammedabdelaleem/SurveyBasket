@@ -1,5 +1,4 @@
-﻿using SurveyBasket.API.Abstractions.Consts;
-using SurveyBasket.API.Contracts.Roles;
+﻿using SurveyBasket.API.Contracts.Roles;
 
 namespace SurveyBasket.API.Services;
 
@@ -11,7 +10,7 @@ public class RoleService(
 	private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
 	private readonly AppDbContext _context = context;
 
-	public async Task<IEnumerable<RoleResponse>> GetAllAsync(bool includeDisabled = false, CancellationToken cancellationToken = default)=>
+	public async Task<IEnumerable<RoleResponse>> GetAllAsync(bool includeDisabled = false, CancellationToken cancellationToken = default) =>
 		await _roleManager.Roles
 		.Where(r => !r.IsDefault &&
 				  (!r.IsDeleted || includeDisabled))  // (includeDisabled.HasValue && includeDisabled.Value) ==== (includeDisabled==true)
@@ -148,7 +147,7 @@ public class RoleService(
 		return Result.Failure<RoleDetailsResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 	}
 
-	public async Task<Result> ToggleStatusAsync(string id, CancellationToken cancellationToken=default)
+	public async Task<Result> ToggleStatusAsync(string id, CancellationToken cancellationToken = default)
 	{
 		if (await _roleManager.FindByIdAsync(id) is not { } role)
 			return Result.Failure<RoleDetailsResponse>(RoleErrors.RoleNotFound);

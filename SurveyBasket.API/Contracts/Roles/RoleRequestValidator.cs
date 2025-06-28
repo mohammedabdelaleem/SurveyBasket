@@ -4,9 +4,9 @@ public class RoleRequestValidator : AbstractValidator<RoleRequest>
 {
 	public RoleRequestValidator()
 	{
-		RuleFor(x=>x.Name)
+		RuleFor(x => x.Name)
 			.NotEmpty()
-			.Length(3,256);
+			.Length(3, 256);
 
 		RuleFor(x => x.Permissions)
 			.NotNull()

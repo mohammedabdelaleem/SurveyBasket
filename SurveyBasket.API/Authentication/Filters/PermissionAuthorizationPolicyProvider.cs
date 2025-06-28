@@ -11,7 +11,7 @@ public class PermissionAuthorizationPolicyProvider(IOptions<AuthorizationOptions
 	{
 		var policy = await base.GetPolicyAsync(policyName);
 
-		if (policy is not null) 
+		if (policy is not null)
 			return policy;
 
 		var permissionPolicy = new AuthorizationPolicyBuilder()

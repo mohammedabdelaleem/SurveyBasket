@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using SurveyBasket.API.Abstractions.Consts;
-
-namespace SurveyBasket.API.Authentication.Filters;
+﻿namespace SurveyBasket.API.Authentication.Filters;
 
 public class PermissionAuthorizationHandler(ILogger<PermissionAuthorizationHandler> logger) : AuthorizationHandler<PermissionRequirement>
 {

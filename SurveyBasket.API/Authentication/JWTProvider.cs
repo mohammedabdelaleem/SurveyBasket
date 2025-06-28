@@ -10,14 +10,14 @@ namespace SurveyBasket.API.Authentication;
 public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 {
 	private readonly JWTOptions _jwtOptions = jwtOptions.Value;
-	
 
-	public (string token, int expiresIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles , IEnumerable<string> permissions)
+
+	public (string token, int expiresIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles, IEnumerable<string> permissions)
 	{
 
 		// Claims Which Needed From Frontend , Card info 
 		Claim[] claims = [
-			
+
 			new Claim(JwtRegisteredClaimNames.Sub, user.Id),
 			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
 			new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
@@ -32,12 +32,12 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 
 		// Key for En/Decoding
 		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
-	
+
 		// Encryption Algorithm
-		var signInCredintials = new SigningCredentials(symmetricSecurityKey,SecurityAlgorithms.HmacSha256);
+		var signInCredintials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
 		var expiresIn = _jwtOptions.ExpiryMinutes;
-		
+
 		// information that added with token	
 		var token = new JwtSecurityToken(
 			issuer: _jwtOptions.Issuer,   // who exports the token : your auth server [iss and aud are excellent for microservices] 
@@ -47,7 +47,7 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 			signingCredentials: signInCredintials
 			);
 
-		return (token:new JwtSecurityTokenHandler().WriteToken(token) , expiresIn: expiresIn * 60);
+		return (token: new JwtSecurityTokenHandler().WriteToken(token), expiresIn: expiresIn * 60);
 	}
 
 	// validate and retutn the user id if token is ok 
@@ -70,16 +70,16 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 				ClockSkew = TimeSpan.Zero, // once the expire time occures , it calculate it as expire don't still 5m
 			}, out SecurityToken validatedToken);
 
-			
+
 			var jwtToken = (JwtSecurityToken)validatedToken;
 			//now we have the access (jwt) token with its claims
 			// we need to return the userId , to use it later and credintial the current user
 
 			return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
 		}
-		catch 
-		{ 
-		return null;
+		catch
+		{
+			return null;
 		}
 
 	}

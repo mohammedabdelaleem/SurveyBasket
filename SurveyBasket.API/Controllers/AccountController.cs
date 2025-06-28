@@ -25,7 +25,7 @@ public class AccountController(IUserService userService) : ControllerBase
 	[HttpPut("info")]
 	public async Task<IActionResult> Info([FromBody] UpdateProfileRequest request)
 	{
-		 await _userService.UpdateProfileAsync(User.GetUserId()!, request);
+		await _userService.UpdateProfileAsync(User.GetUserId()!, request);
 		return NoContent();
 	}
 

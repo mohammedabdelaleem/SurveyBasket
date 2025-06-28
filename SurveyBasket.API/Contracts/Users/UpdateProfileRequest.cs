@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.API.Contracts.Users;
 
-public record UpdateProfileRequest (
+public record UpdateProfileRequest(
 	string FirstName,
 	string LastName
 	);

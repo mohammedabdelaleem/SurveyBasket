@@ -26,9 +26,9 @@ public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
 			.NotNull();
 
 		RuleFor(x => x.Roles)
-		.Must(r=>r.Distinct().Count() == r.Count)
+		.Must(r => r.Distinct().Count() == r.Count)
 		.WithMessage("Roles Must Be Distinct, No Duplicates.")
-		.When(x=>x.Roles != null);
+		.When(x => x.Roles != null);
 
 	}
 }

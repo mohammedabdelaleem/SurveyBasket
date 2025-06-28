@@ -32,7 +32,7 @@ public class ApplicationUserConfigurations : IEntityTypeConfiguration<Applicatio
 			ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
 			SecurityStamp = DefaultUsers.AdminSecurityStamp,
 			EmailConfirmed = true, // don't forget this , We don't need default admin to sign in
-			PasswordHash =DefaultUsers.AdminPasswordHash 
+			PasswordHash = DefaultUsers.AdminPasswordHash
 		});
 	}
 }

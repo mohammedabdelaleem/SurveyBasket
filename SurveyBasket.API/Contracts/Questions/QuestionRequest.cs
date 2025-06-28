@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.API.Contracts.Questions;
 
 public record QuestionRequest(
-	string Content, 
+	string Content,
 	List<string> Answers
 );

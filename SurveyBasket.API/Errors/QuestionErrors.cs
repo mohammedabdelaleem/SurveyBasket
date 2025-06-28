@@ -16,7 +16,7 @@ public record QuestionErrors
 		= new Error("Question.SaveError", "Question While Saving", StatusCodes.Status500InternalServerError);
 
 
-	public static readonly Error DuplicateContent 
+	public static readonly Error DuplicateContent
 		= new Error("Question.DuplicateTitle", "Question With The Same Content Value Is Found At The Same Poll, Please Enter Another One", StatusCodes.Status409Conflict);
 
 

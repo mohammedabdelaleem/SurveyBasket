@@ -18,7 +18,7 @@ public sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvide
 				["Bearer"] = new OpenApiSecurityScheme
 				{
 					Type = SecuritySchemeType.Http,
-					Scheme = JwtBearerDefaults.AuthenticationScheme.ToLower()	, // "bearer" refers to the header name here
+					Scheme = JwtBearerDefaults.AuthenticationScheme.ToLower(), // "bearer" refers to the header name here
 					In = ParameterLocation.Header,
 					BearerFormat = "JWT"
 				}

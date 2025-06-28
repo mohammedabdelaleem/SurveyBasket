@@ -12,13 +12,13 @@ namespace SurveyBasket.API.Controllers;
 [ApiVersion(1, Deprecated = true)]
 [ApiVersion(2)]
 
-public class VotesController(IQuestionService questionService,IVoteService voteService) : ControllerBase
+public class VotesController(IQuestionService questionService, IVoteService voteService) : ControllerBase
 {
 	private readonly IQuestionService _questionService = questionService;
 	private readonly IVoteService _voteService = voteService;
 
 	[HttpGet]
-	public async Task<IActionResult> Start([FromRoute] int pollId, [FromQuery] RequestFilters filters ,CancellationToken cancellation=default)
+	public async Task<IActionResult> Start([FromRoute] int pollId, [FromQuery] RequestFilters filters, CancellationToken cancellation = default)
 	{
 		// Authorized User At HttpContext
 		string userId = User.GetUserId()!;
@@ -29,7 +29,7 @@ public class VotesController(IQuestionService questionService,IVoteService voteS
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Vote([FromRoute] int pollId, [FromBody] VoteRequest request ,CancellationToken cancellation = default)
+	public async Task<IActionResult> Vote([FromRoute] int pollId, [FromBody] VoteRequest request, CancellationToken cancellation = default)
 	{
 		var result = await _voteService.AddVoteAsync(pollId, User.GetUserId()!, request, cancellation);
 

@@ -4,8 +4,8 @@ public static class Permissions
 {
 	public static string Type { get; } = "permissions";
 
-	public const string GetPolls =	  "polls:read";
-	public const string AddPoll =     "polls:add";
+	public const string GetPolls = "polls:read";
+	public const string AddPoll = "polls:add";
 	public const string UpdatePoll = "polls:update";
 	public const string DeletePoll = "polls:delete";
 
@@ -26,6 +26,6 @@ public static class Permissions
 
 	public const string Results = "results:read";
 
-	public static IList<string?> GetAllPermissions()=>
+	public static IList<string?> GetAllPermissions() =>
 		typeof(Permissions).GetFields().Select(f => f.GetValue(f) as string).ToList();
 }

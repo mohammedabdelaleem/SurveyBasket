@@ -14,9 +14,9 @@ public class RoleController(IRoleService roleService) : ControllerBase
 
 	[HttpGet]
 	[HasPermission(Permissions.GetRoles)]
-	public async Task<IActionResult> GetAll([FromQuery] bool includeDisabled,CancellationToken cancellationToken=default)
+	public async Task<IActionResult> GetAll([FromQuery] bool includeDisabled, CancellationToken cancellationToken = default)
 	{
-	
+
 		return Ok(await _roleService.GetAllAsync(includeDisabled, cancellationToken));
 	}
 
@@ -32,13 +32,13 @@ public class RoleController(IRoleService roleService) : ControllerBase
 	[HasPermission(Permissions.AddRole)]
 	public async Task<IActionResult> Add([FromBody] RoleRequest request, CancellationToken cancellationToken = default)
 	{
-		var result = await _roleService.AddAsync(request,cancellationToken);
-		return result.IsSuccess ? CreatedAtAction(nameof(Get) , new { id=result.Value.Id}, result.Value) : result.ToProblem();
+		var result = await _roleService.AddAsync(request, cancellationToken);
+		return result.IsSuccess ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value) : result.ToProblem();
 	}
 
 	[HttpPut("{id}")]
 	[HasPermission(Permissions.UpdateRole)]
-	public async Task<IActionResult> Update([FromRoute] string id, [FromBody]RoleRequest request, CancellationToken cancellationToken=default)
+	public async Task<IActionResult> Update([FromRoute] string id, [FromBody] RoleRequest request, CancellationToken cancellationToken = default)
 	{
 		var result = await _roleService.UpdateAsync(id, request, cancellationToken);
 		return result.IsSuccess ? NoContent() : result.ToProblem();
@@ -47,7 +47,7 @@ public class RoleController(IRoleService roleService) : ControllerBase
 
 	[HttpPut("{id}/toggle-status")]
 	[HasPermission(Permissions.UpdateRole)]
-	public async Task<IActionResult> ToggleStatus([FromRoute] string id,  CancellationToken cancellationToken = default)
+	public async Task<IActionResult> ToggleStatus([FromRoute] string id, CancellationToken cancellationToken = default)
 	{
 		var result = await _roleService.ToggleStatusAsync(id, cancellationToken);
 		return result.IsSuccess ? NoContent() : result.ToProblem();

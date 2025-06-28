@@ -6,10 +6,10 @@ public class ResultService(AppDbContext context) : IResultService
 {
 	private readonly AppDbContext _context = context;
 
-	public async Task<Result<PollVotesResponse>> GetPollVotesAsync(int pollId, CancellationToken cancellationToken=default)
+	public async Task<Result<PollVotesResponse>> GetPollVotesAsync(int pollId, CancellationToken cancellationToken = default)
 	{
 		var pollVotes = await _context.Polls
-			.Where(p=>p.Id == pollId)
+			.Where(p => p.Id == pollId)
 			.Select(p => new PollVotesResponse
 			(
 			 p.Title,
@@ -34,7 +34,7 @@ public class ResultService(AppDbContext context) : IResultService
 
 	public async Task<Result<IEnumerable<VotesPerDayRespnse>>> GetVotesPerDayAsync(int pollId, CancellationToken cancellationToken = default)
 	{
-		var pollIsExists = await _context.Polls.AnyAsync(p=>p.Id==pollId , cancellationToken);
+		var pollIsExists = await _context.Polls.AnyAsync(p => p.Id == pollId, cancellationToken);
 		if (!pollIsExists)
 			return Result.Failure<IEnumerable<VotesPerDayRespnse>>(PollErrors.PollNotFound);
 
@@ -59,17 +59,17 @@ public class ResultService(AppDbContext context) : IResultService
 			return Result.Failure<IEnumerable<VotesPerQuestionResponse>>(PollErrors.PollNotFound);
 
 
-	var votesPerQuestion = await _context.VoteAnswers
-			.Where(v=>v.Vote.PollId == pollId)
-			.Select(v=> new VotesPerQuestionResponse (
-				v.Question.Content,
-				v.Question.Votes
-					.GroupBy(v=> new {AnswerId = v.Answer.Id , AnswerContent = v.Answer.Content })
-					.Select(g=> new VotesPerAnswerResponse(
-						g.Key.AnswerContent,
-						g.Count())
-				)))
-			.ToListAsync(cancellationToken);
+		var votesPerQuestion = await _context.VoteAnswers
+				.Where(v => v.Vote.PollId == pollId)
+				.Select(v => new VotesPerQuestionResponse(
+					v.Question.Content,
+					v.Question.Votes
+						.GroupBy(v => new { AnswerId = v.Answer.Id, AnswerContent = v.Answer.Content })
+						.Select(g => new VotesPerAnswerResponse(
+							g.Key.AnswerContent,
+							g.Count())
+					)))
+				.ToListAsync(cancellationToken);
 
 
 		return Result.Success<IEnumerable<VotesPerQuestionResponse>>(votesPerQuestion);

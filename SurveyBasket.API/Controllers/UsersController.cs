@@ -37,9 +37,9 @@ public class UsersController(IUserService userService) : ControllerBase
 
 	[HttpPut("{id}")]
 	[HasPermission(Permissions.UpdateUser)]
-	public async Task<IActionResult> Update([FromRoute] string id,[FromBody] UpdateUserRequest request, CancellationToken cancellationToken = default)
+	public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken = default)
 	{
-		var result = await _userService.UpdateAsync(id,request, cancellationToken);
+		var result = await _userService.UpdateAsync(id, request, cancellationToken);
 		return result.IsSuccess ? NoContent() : result.ToProblem();
 	}
 

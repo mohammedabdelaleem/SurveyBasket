@@ -1,5 +1,4 @@
-﻿using SurveyBasket.API.Abstractions.Consts;
-using SurveyBasket.API.Contracts.Users;
+﻿using SurveyBasket.API.Contracts.Users;
 
 namespace SurveyBasket.API.Services;
 
@@ -12,14 +11,14 @@ public class UserService(
 	private readonly IRoleService _roleService = roleService;
 	private readonly AppDbContext _context = context;
 
-	public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default)=>
+	public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default) =>
 		await (
 			from u in _context.Users
 			join ur in _context.UserRoles
 			on u.Id equals ur.UserId
 			join r in _context.Roles
 			on ur.RoleId equals r.Id into roles // "Group all the roles for each user into a list, don’t repeat the user for each role."  === This is a group join, which creates a list of roles per user.
-			where !roles.Any(r => r.Name == DefaultRoles.Member) 
+			where !roles.Any(r => r.Name == DefaultRoles.Member)
 			select new // what data you need from tables  
 			{
 				u.Id,
@@ -50,7 +49,7 @@ public class UserService(
 
 	public async Task<Result<UserResponse>> GetAsync(string userId)
 	{
-		if(await _userManager.FindByIdAsync(userId) is not { } user)
+		if (await _userManager.FindByIdAsync(userId) is not { } user)
 			return Result.Failure<UserResponse>(UserErrors.UserNotFound);
 
 		var userRoles = await _userManager.GetRolesAsync(user);
@@ -60,10 +59,10 @@ public class UserService(
 		return Result.Success(response);
 	}
 
-	public async Task<Result<UserResponse>> AddAsync(CreateUserRequest request , CancellationToken cancellationToken=default)
+	public async Task<Result<UserResponse>> AddAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
 	{
-		var EmailIsExists = await _userManager.Users.AnyAsync(u=>u.Email == request.Email, cancellationToken);
-		if(EmailIsExists)	
+		var EmailIsExists = await _userManager.Users.AnyAsync(u => u.Email == request.Email, cancellationToken);
+		if (EmailIsExists)
 			return Result.Failure<UserResponse>(UserErrors.DuplicatedEmail);
 
 		#region get roles using DbConxtext 
@@ -73,10 +72,10 @@ public class UserService(
 		//if (request.Roles.Except(allowedRoles).Any())
 		//	return Result.Failure<UserResponse>(RoleErrors.InvalidRoles);
 		#endregion
-		
-		var allowedRoles = await _roleService.GetAllAsync(cancellationToken:cancellationToken);
 
-		if (request.Roles.Except(allowedRoles.Select(r=>r.Name)).Any())
+		var allowedRoles = await _roleService.GetAllAsync(cancellationToken: cancellationToken);
+
+		if (request.Roles.Except(allowedRoles.Select(r => r.Name)).Any())
 			return Result.Failure<UserResponse>(UserErrors.InvalidRoles);
 
 		var user = request.Adapt<ApplicationUser>();
@@ -105,20 +104,20 @@ public class UserService(
 		return Result.Failure<UserResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 
 	}
-	
-	public async Task<Result> UpdateAsync(string id,UpdateUserRequest request , CancellationToken cancellationToken=default)
+
+	public async Task<Result> UpdateAsync(string id, UpdateUserRequest request, CancellationToken cancellationToken = default)
 	{
-		var EmailIsExists = await _userManager.Users.AnyAsync(u=>u.Email == request.Email && u.Id != id, cancellationToken);
-		if(EmailIsExists)	
+		var EmailIsExists = await _userManager.Users.AnyAsync(u => u.Email == request.Email && u.Id != id, cancellationToken);
+		if (EmailIsExists)
 			return Result.Failure(UserErrors.DuplicatedEmail);
-		
 
-		var allowedRoles = await _roleService.GetAllAsync(cancellationToken:cancellationToken);
 
-		if (request.Roles.Except(allowedRoles.Select(r=>r.Name)).Any())
+		var allowedRoles = await _roleService.GetAllAsync(cancellationToken: cancellationToken);
+
+		if (request.Roles.Except(allowedRoles.Select(r => r.Name)).Any())
 			return Result.Failure(UserErrors.InvalidRoles);
 
-		if(await _userManager.FindByIdAsync(id) is not { } user)
+		if (await _userManager.FindByIdAsync(id) is not { } user)
 			return Result.Failure(UserErrors.UserNotFound);
 
 		user = request.Adapt(user);
@@ -132,10 +131,10 @@ public class UserService(
 			// but here no id ++ so we can remove all roles assigned to this user from userRoles then add the new roles comming at request
 
 			await _context.UserRoles
-				.Where(ur=>ur.UserId == id)
+				.Where(ur => ur.UserId == id)
 				.ExecuteDeleteAsync(cancellationToken);
 
-			await _userManager.AddToRolesAsync(user,request.Roles);
+			await _userManager.AddToRolesAsync(user, request.Roles);
 
 			return Result.Success();
 		}
@@ -152,10 +151,10 @@ public class UserService(
 
 		user.IsDisabled = !user.IsDisabled;
 
-		var result =await _userManager.UpdateAsync(user);
+		var result = await _userManager.UpdateAsync(user);
 
-		if (result.Succeeded) 
-		return Result.Success();
+		if (result.Succeeded)
+			return Result.Success();
 
 
 		var error = result.Errors.First();

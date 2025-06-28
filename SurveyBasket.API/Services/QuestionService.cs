@@ -66,9 +66,9 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 		return Result.Success(response);
 
 	}
-	
-	
-	public async Task<Result<PaginationList<QuestionResponse>>> GetAvailableAsync(int pollId, string userId,RequestFilters filters, CancellationToken cancellationToken)
+
+
+	public async Task<Result<PaginationList<QuestionResponse>>> GetAvailableAsync(int pollId, string userId, RequestFilters filters, CancellationToken cancellationToken)
 	{
 
 		var pollIsExists = await _context.Polls.AnyAsync(p => p.Id == pollId &&
@@ -114,7 +114,7 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 		// get the data from cache then pagination
 		// Now paginate manually (since already in memory)
 		var paginated = PaginationList<QuestionResponse>.Create(
-				availabeQuestions.Where(q=> string.IsNullOrEmpty(filters.SearchValue) || q.Content.ToLower().Contains(filters.SearchValue.ToLower())), 
+				availabeQuestions.Where(q => string.IsNullOrEmpty(filters.SearchValue) || q.Content.ToLower().Contains(filters.SearchValue.ToLower())),
 				filters.PageNumber, filters.PageSize);
 
 		return Result.Success(paginated);
@@ -132,7 +132,7 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 		var questionResponse = await _context.Questions
 			.Include(q => q.Answers)
-			.Where(q => q.PollId == pollId )
+			.Where(q => q.PollId == pollId)
 			.ProjectToType<QuestionResponse>()
 			.SingleOrDefaultAsync(cancellationToken);
 
@@ -167,7 +167,7 @@ public class QuestionService(AppDbContext context, HybridCache hybridCache, ILog
 
 		await _context.AddAsync(question, cancellationToken);
 		await _context.SaveChangesAsync(cancellationToken);
-		
+
 		await _hybridCache.RemoveAsync($"{_chachePrefix}-{pollId}", cancellationToken);
 
 		return Result.Success(question.Adapt<QuestionResponse>());

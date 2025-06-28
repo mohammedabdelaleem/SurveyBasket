@@ -1,9 +1,6 @@
 ﻿
 using Asp.Versioning;
 using Microsoft.AspNetCore.RateLimiting;
-using SurveyBasket.API.Abstractions.Consts;
-using System.Linq.Expressions;
-using System.Reflection.Metadata;
 
 namespace SurveyBasket.API.Controllers;
 [Route("[controller]")]
@@ -17,7 +14,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 	private readonly IAuthService _authService = authService;
 	private readonly ILogger<AuthController> _logger = logger;
 
-		
+
 	[HttpPost("register")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]

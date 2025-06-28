@@ -5,7 +5,7 @@ using SurveyBasket.API.Contracts.Questions;
 namespace SurveyBasket.API.Controllers;
 [Route("api/polls/{pollId}/[controller]")]
 [ApiController]
-[ApiVersion(1, Deprecated =true)]
+[ApiVersion(1, Deprecated = true)]
 [ApiVersion(2)]
 
 public class QuestionController(IQuestionService questionService) : ControllerBase
@@ -15,9 +15,9 @@ public class QuestionController(IQuestionService questionService) : ControllerBa
 	[HttpGet("all")]
 	[HasPermission(Permissions.GetQuestion)]
 
-	public async Task<IActionResult> GetAll([FromRoute] int pollId, [FromQuery] RequestFilters filters ,CancellationToken cancellationToken=default)
+	public async Task<IActionResult> GetAll([FromRoute] int pollId, [FromQuery] RequestFilters filters, CancellationToken cancellationToken = default)
 	{
-		var result = await _questionService.GetAllAsync(pollId,filters, cancellationToken);
+		var result = await _questionService.GetAllAsync(pollId, filters, cancellationToken);
 
 		return result.IsSuccess ? Ok(result.Value)
 			: result.ToProblem();
@@ -26,11 +26,11 @@ public class QuestionController(IQuestionService questionService) : ControllerBa
 
 	[HttpGet("{questionId}")]
 	[HasPermission(Permissions.GetQuestion)]
-	public async Task<IActionResult> Get([FromRoute] int pollId, [FromRoute]int questionId, CancellationToken cancellationToken = default)
+	public async Task<IActionResult> Get([FromRoute] int pollId, [FromRoute] int questionId, CancellationToken cancellationToken = default)
 	{
 		var result = await _questionService.GetAsync(pollId, questionId, cancellationToken);
 
-		return result.IsSuccess ? 
+		return result.IsSuccess ?
 			Ok(result.Value) : result.ToProblem();
 	}
 
@@ -43,7 +43,7 @@ public class QuestionController(IQuestionService questionService) : ControllerBa
 		var result = await _questionService.AddAsync(pollId, request, cancellation);
 
 		return result.IsSuccess ?
-			CreatedAtAction(nameof(Get), new {  pollId, questionId = result.Value.Id }, result.Value) :
+			CreatedAtAction(nameof(Get), new { pollId, questionId = result.Value.Id }, result.Value) :
 			result.ToProblem();
 	}
 
@@ -53,7 +53,7 @@ public class QuestionController(IQuestionService questionService) : ControllerBa
 
 	public async Task<IActionResult> Update([FromRoute] int pollId, [FromRoute] int questionId, [FromBody] QuestionRequest request, CancellationToken cancellation = default)
 	{
-		var result =await  _questionService.UpdateAsync(pollId,questionId,request, cancellation);
+		var result = await _questionService.UpdateAsync(pollId, questionId, request, cancellation);
 
 		return result.IsSuccess ?
 			NoContent() : result.ToProblem();
@@ -66,7 +66,7 @@ public class QuestionController(IQuestionService questionService) : ControllerBa
 	{
 		var result = await _questionService.ToggleStatusAsync(pollId, questionId, cancellation);
 
-		return result.IsSuccess ? 
+		return result.IsSuccess ?
 			NoContent() : result.ToProblem();
 	}
 }

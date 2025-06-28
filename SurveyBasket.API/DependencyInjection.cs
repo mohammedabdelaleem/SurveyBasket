@@ -1,19 +1,18 @@
 ﻿
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using SurveyBasket.API.Authentication;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using SurveyBasket.API.Settings;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Hangfire;
-using SurveyBasket.API.Health;
-using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
 using Asp.Versioning;
-using SurveyBasket.API.OpenApiTransformers;
 using Asp.Versioning.ApiExplorer;
-using MailKit;
+using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.IdentityModel.Tokens;
+using SurveyBasket.API.Authentication;
+using SurveyBasket.API.Health;
+using SurveyBasket.API.OpenApiTransformers;
+using SurveyBasket.API.Settings;
+using System.Text;
+using System.Threading.RateLimiting;
 
 namespace SurveyBasket.API;
 
@@ -41,7 +40,7 @@ public static class DependencyInjection
 
 		// AddCors for specific origin(s)
 		services.AddCors(
-		options => options.AddDefaultPolicy( builder =>
+		options => options.AddDefaultPolicy(builder =>
 		builder
 		.AllowAnyMethod()
 		.AllowAnyHeader()
@@ -83,9 +82,9 @@ public static class DependencyInjection
 		services.AddHealthChecks()
 			.AddSqlServer(name: "Database", connectionString: constr)
 			.AddHangfire(options => { options.MinimumAvailableServers = 1; })
-			.AddUrlGroup(name: "Google API" , uri: new Uri("https://www.google.com"), tags: ["api","testing"], httpMethod:HttpMethod.Get)
+			.AddUrlGroup(name: "Google API", uri: new Uri("https://www.google.com"), tags: ["api", "testing"], httpMethod: HttpMethod.Get)
 			.AddUrlGroup(name: "Facebook API", uri: new Uri("https://www.Facebook.com"), tags: ["api"], httpMethod: HttpMethod.Get)
-			.AddCheck< MailProviderHealthChecks>(name:"email provider health check");
+			.AddCheck<MailProviderHealthChecks>(name: "email provider health check");
 
 		services.AddRateLimiterConfig();
 
@@ -211,7 +210,7 @@ public static class DependencyInjection
 
 		services.AddHangfireServer();
 
-		return services;	
+		return services;
 	}
 	private static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
 	{
@@ -282,7 +281,7 @@ public static class DependencyInjection
 	}
 
 
-	private static IServiceCollection AddRateLimiterConfig(this  IServiceCollection services)
+	private static IServiceCollection AddRateLimiterConfig(this IServiceCollection services)
 	{
 		services.AddRateLimiter(rateLimiterOptions =>
 		{

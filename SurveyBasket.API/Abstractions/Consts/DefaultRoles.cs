@@ -10,7 +10,7 @@ public static class DefaultRoles
 	public const string Member = nameof(Member);
 	public const string MemberRoleId = "01979187-c392-77be-89d1-ffe7d2df25d4";
 	public const string MemberConcurrencyStamp = "01979187-c392-77be-89d1-ffe8850dfea6";
-	
+
 	////we can do :
 	//public partial class Admin
 	//{
@@ -27,5 +27,5 @@ public static class DefaultRoles
 	//}
 
 	////then ===> DefaultRoles.Admin.Id , .....
-	
+
 }

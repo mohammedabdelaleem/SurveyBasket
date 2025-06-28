@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace SurveyBasket.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-[ApiVersion(1, Deprecated =true)]
+[ApiVersion(1, Deprecated = true)]
 [ApiVersion(2)]
 
 public class PollsController : ControllerBase
@@ -27,18 +27,18 @@ public class PollsController : ControllerBase
 	{
 		var result = await pollService.GetAllAsync(cancellationToken);
 
-		return (result.IsFailure) ? 
+		return (result.IsFailure) ?
 			result.ToProblem()
 			: Ok(result.Value);
 
 		#region Problem => Results
-			//{
-			//	"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-			//	"title": "Poll.NotFound",
-			//	"status": 404,
-			//	"detail": "Poll With Given Id Not Found",
-			//	"traceId": "00-d5b10ee08cf178f88fd9e72d1dba5fed-e7266b5b09d3e5d6-00"
-			//}
+		//{
+		//	"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+		//	"title": "Poll.NotFound",
+		//	"status": 404,
+		//	"detail": "Poll With Given Id Not Found",
+		//	"traceId": "00-d5b10ee08cf178f88fd9e72d1dba5fed-e7266b5b09d3e5d6-00"
+		//}
 		#endregion
 
 	}
@@ -94,7 +94,7 @@ public class PollsController : ControllerBase
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[HasPermission(Permissions.AddPoll)]
-	public async Task<ActionResult> Add([FromBody] PollRequest poll, CancellationToken cancellationToken=default)
+	public async Task<ActionResult> Add([FromBody] PollRequest poll, CancellationToken cancellationToken = default)
 	{
 
 		if (poll is null)
@@ -102,8 +102,8 @@ public class PollsController : ControllerBase
 
 		var result = await pollService.AddAsync(poll, cancellationToken);
 
-		return (result.IsSuccess)? 
-		 CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value):
+		return (result.IsSuccess) ?
+		 CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value) :
 		 result.ToProblem();
 	}
 
@@ -112,11 +112,11 @@ public class PollsController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[HasPermission(Permissions.UpdatePoll)]
-	public async Task<ActionResult> Update([FromRoute]int id, [FromBody] PollRequest poll, CancellationToken cancellationToken = default)
+	public async Task<ActionResult> Update([FromRoute] int id, [FromBody] PollRequest poll, CancellationToken cancellationToken = default)
 	{
 		var result = await pollService.UpdateAsync(id, poll, cancellationToken);
 
-		return(result.IsSuccess)? NoContent():
+		return (result.IsSuccess) ? NoContent() :
 		 result.ToProblem();
 
 	}
@@ -166,7 +166,7 @@ public class PollsController : ControllerBase
 	{
 		var result = await pollService.TogglePublishStatusAsync(id, cancellationToken);
 
-		return (result.IsSuccess)? NoContent():
+		return (result.IsSuccess) ? NoContent() :
 			 result.ToProblem();
 	}
 

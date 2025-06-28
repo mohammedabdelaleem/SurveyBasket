@@ -1,9 +1,9 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
-using Serilog;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -59,7 +59,7 @@ var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 var scope = scopeFactory.CreateScope();
 var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
-RecurringJob.AddOrUpdate("SendNewPollsNotification", () => notificationService.SendNewPollsNotification(null) , Cron.Daily); // https://crontab.guru/  
+RecurringJob.AddOrUpdate("SendNewPollsNotification", () => notificationService.SendNewPollsNotification(null), Cron.Daily); // https://crontab.guru/  
 
 
 app.UseCors();
@@ -72,7 +72,7 @@ app.UseExceptionHandler();
 
 app.UseRateLimiter();
 
-app.MapHealthChecks("health" , new HealthCheckOptions
+app.MapHealthChecks("health", new HealthCheckOptions
 {
 	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 }
@@ -80,7 +80,7 @@ app.MapHealthChecks("health" , new HealthCheckOptions
 
 app.MapHealthChecks("health-check-api", new HealthCheckOptions
 {
-	Predicate = x=>x.Tags.Contains("api"),
+	Predicate = x => x.Tags.Contains("api"),
 	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 }
 );

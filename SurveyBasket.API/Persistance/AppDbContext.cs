@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace SurveyBasket.API.Persistance;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options,
-	IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser , ApplicationRole, string>(options)
+	IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
 {
 	private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -21,7 +21,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options,
 
 
 		// change on delete behaviour
- 		var cascadeFKs = modelBuilder.Model
+		var cascadeFKs = modelBuilder.Model
 			.GetEntityTypes().SelectMany(e => e.GetForeignKeys())
 			.Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade && !fk.IsOwnership);
 

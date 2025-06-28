@@ -26,7 +26,7 @@ public class PollService(
 	{
 		// which polls i can choose to make votes on it ?
 		var polls = await _context.Polls
-			.Where(p=>p.IsPublished && DateOnly.FromDateTime(DateTime.UtcNow) >= p.StartsAt && DateOnly.FromDateTime(DateTime.UtcNow) <= p.EndsAt )
+			.Where(p => p.IsPublished && DateOnly.FromDateTime(DateTime.UtcNow) >= p.StartsAt && DateOnly.FromDateTime(DateTime.UtcNow) <= p.EndsAt)
 			.AsNoTracking()
 			.ProjectToType<PollResponse>()
 			.ToListAsync(cancellationToken);
@@ -53,7 +53,7 @@ public class PollService(
 
 	public async Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default)
 	{
-		var poll =await _context.Polls.FindAsync(id,cancellationToken);
+		var poll = await _context.Polls.FindAsync(id, cancellationToken);
 		return (poll != null) ?
 			Result.Success(poll.Adapt<PollResponse>()) :
 			Result.Failure<PollResponse>(PollErrors.PollNotFound);
@@ -68,11 +68,11 @@ public class PollService(
 
 		Poll poll = pollRequest.Adapt<Poll>();
 		await _context.Polls.AddAsync(poll, cancellationToken);
-		int numberOfStates=await _context.SaveChangesAsync(cancellationToken);
+		int numberOfStates = await _context.SaveChangesAsync(cancellationToken);
 
 		var pollResponse = poll.Adapt<PollResponse>();
 
-		return numberOfStates!=0 ? Result.Success(pollResponse) : Result.Failure<PollResponse>(PollErrors.SaveError);
+		return numberOfStates != 0 ? Result.Success(pollResponse) : Result.Failure<PollResponse>(PollErrors.SaveError);
 	}
 
 	public async Task<Result> UpdateAsync(int id, PollRequest pollRequest, CancellationToken cancellationToken = default)
@@ -99,8 +99,8 @@ public class PollService(
 	{
 		var poll = await _context.Polls.FindAsync(id, cancellationToken);
 
-		if (poll is null)return Result.Failure(PollErrors.PollNotFound);
-		
+		if (poll is null) return Result.Failure(PollErrors.PollNotFound);
+
 		_context.Remove(poll);
 
 		int numberOfStates = await _context.SaveChangesAsync(cancellationToken);

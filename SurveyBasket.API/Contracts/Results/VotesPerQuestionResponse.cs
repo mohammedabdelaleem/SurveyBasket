@@ -3,5 +3,5 @@
 public record VotesPerQuestionResponse(
 	string Title,
 	IEnumerable<VotesPerAnswerResponse> SelectedAnswers
-	
+
 	);

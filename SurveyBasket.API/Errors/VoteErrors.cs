@@ -4,7 +4,7 @@
 public record VoteErrors
 {
 
-	public static readonly Error PollNotFound 
+	public static readonly Error PollNotFound
 		= new Error("Vote.NotFound", "Vote With Given Id Not Found", StatusCodes.Status404NotFound);
 
 

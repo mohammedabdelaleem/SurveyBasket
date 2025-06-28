@@ -2,6 +2,6 @@
 
 public record RoleResponse(
 	string Id,
-	string Name, 
+	string Name,
 	bool IsDeleted
 	);

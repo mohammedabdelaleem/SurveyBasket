@@ -1,6 +1,4 @@
-﻿using SurveyBasket.API.Abstractions.Consts;
-
-namespace SurveyBasket.API.Contracts.Users;
+﻿namespace SurveyBasket.API.Contracts.Users;
 
 public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
 {
@@ -18,5 +16,5 @@ public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRe
 			.WithMessage("New Password Can't Be The Same Old Password");
 
 
-			}
+	}
 }

@@ -16,16 +16,16 @@ public class MappingConfigurations : IRegister
 
 		config.NewConfig<QuestionRequest, Question>()
 			.Map(dest => dest.Answers, src => src.Answers.Select(answer => new Answer { Content = answer })); // super
-	
+
 		////////////////////////
-	
-	config.NewConfig<Question, QuestionResponse>()
-			.Map(dest => dest.Answers,
-			src => src.Answers.Where(a => a.IsActive));
+
+		config.NewConfig<Question, QuestionResponse>()
+				.Map(dest => dest.Answers,
+				src => src.Answers.Where(a => a.IsActive));
 
 
 		config.NewConfig<Question, QuestionResponse>()
-			.Map(dest => dest.Answers, src => src.Answers.Select(answer => new AnswerResponse (answer.Id, answer.Content))); // super : Thanks Allah
+			.Map(dest => dest.Answers, src => src.Answers.Select(answer => new AnswerResponse(answer.Id, answer.Content))); // super : Thanks Allah
 
 
 		config.NewConfig<RegisterRequest, ApplicationUser>()

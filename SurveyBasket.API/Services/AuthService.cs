@@ -5,7 +5,6 @@ using SurveyBasket.API.Authentication;
 using SurveyBasket.API.Helpers;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 
 namespace SurveyBasket.API.Services;
 
@@ -40,7 +39,7 @@ public class AuthService(
 		if (await _userManager.FindByEmailAsync(email) is not { } user) // instead of the above 2 steps 
 			return Result.Failure<AuthResponse>(UserErrors.InvalidCredintials);
 
-		if(user.IsDisabled)
+		if (user.IsDisabled)
 			return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
 
 
@@ -83,10 +82,10 @@ public class AuthService(
 
 	// the first way , Learn It For Yourself , We Don't Use It 
 	#endregion
-	public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken=default)
+	public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
 	{
 		// unique email checker 
-		var emailIsExists = await _userManager.Users.AnyAsync(u=>u.Email == request.Email, cancellationToken);
+		var emailIsExists = await _userManager.Users.AnyAsync(u => u.Email == request.Email, cancellationToken);
 
 		if (emailIsExists)
 			return Result.Failure(UserErrors.DuplicatedEmail);
@@ -97,26 +96,26 @@ public class AuthService(
 
 		var result = await _userManager.CreateAsync(user, request.Password);
 
-		if(result.Succeeded)
+		if (result.Succeeded)
 		{
 			// Generate Code 
 			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 			code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-			_logger.LogInformation("Email Confirmation Code {code}",code);
+			_logger.LogInformation("Email Confirmation Code {code}", code);
 
 
 			// you have 2 choices for backgroud job using hangfire 
 			// 01 - Make your Method public 
-					//BackgroundJob.Enqueue(() => SendConfirmationEmail(user, code)); // ensure public
+			//BackgroundJob.Enqueue(() => SendConfirmationEmail(user, code)); // ensure public
 
 
 			// 02 - Set Job Inside the Method
-		
+
 
 			// Send Email
 			await SendConfirmationEmail(user, code);
-		
+
 
 			return Result.Success();
 		}
@@ -132,15 +131,15 @@ public class AuthService(
 			return Result.Failure(UserErrors.InvalidCode);
 
 
-		if(user.EmailConfirmed)
+		if (user.EmailConfirmed)
 			return Result.Failure(UserErrors.DuplicatedConfirmation); // send the same request more than 1
 
 		var code = request.Code;
 		try
-		{ 
+		{
 			code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
 		}
-		catch(FormatException)
+		catch (FormatException)
 		{
 			return Result.Failure(UserErrors.InvalidCode);
 		}
@@ -149,7 +148,7 @@ public class AuthService(
 		// now we need to confirm email
 		var result = await _userManager.ConfirmEmailAsync(user, code);
 		if (result.Succeeded)
-	   	   {
+		{
 			await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
 			return Result.Success();
 		}
@@ -163,10 +162,10 @@ public class AuthService(
 
 	public async Task<Result> ResendEmailConfirmationAsync(ResendEmailConfirmationRequest request)
 	{
-		if(await _userManager.FindByEmailAsync(request.Email) is not { }user)
+		if (await _userManager.FindByEmailAsync(request.Email) is not { } user)
 			return Result.Success(); // here we not telling the truth to the user, may be hacker[confusion]
 
-		if(user.EmailConfirmed)
+		if (user.EmailConfirmed)
 			return Result.Failure(UserErrors.DuplicatedConfirmation);
 
 		// Generate Code 
@@ -263,7 +262,7 @@ public class AuthService(
 		#endregion
 
 		if (!user.EmailConfirmed) // record has a powerful feature , change specific value from object while taking instance 
-			return Result.Failure(UserErrors.EmailNotConfirmed with { StatusCode=StatusCodes.Status400BadRequest});
+			return Result.Failure(UserErrors.EmailNotConfirmed with { StatusCode = StatusCodes.Status400BadRequest });
 
 
 		// find a user with the incomming email ==>
@@ -290,7 +289,7 @@ public class AuthService(
 	{
 		var user = await _userManager.FindByEmailAsync(request.Email);
 
-		if(user is null || !user.EmailConfirmed)
+		if (user is null || !user.EmailConfirmed)
 			return Result.Failure(UserErrors.InvalidCode);
 
 		IdentityResult result;
@@ -305,25 +304,25 @@ public class AuthService(
 			result = IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken());
 		}
 
-		if(result.Succeeded)
+		if (result.Succeeded)
 			return Result.Success();
 
 
 		var error = result.Errors.First();
-		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));	
-	}	
+		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));
+	}
 
 
 
 
-	private async Task<Result<AuthResponse>> HandleAuthResponse(ApplicationUser user, CancellationToken cancellationToken=default)
+	private async Task<Result<AuthResponse>> HandleAuthResponse(ApplicationUser user, CancellationToken cancellationToken = default)
 	{
 
 
 		var (UserRoles, permissions) = await GetUserRolesAndPermissions(user, cancellationToken);
 
 		// Generate JWT Token 
-		var (newToken, expiresIn) = _jWTProvider.GenerateToken(user,UserRoles, permissions);
+		var (newToken, expiresIn) = _jWTProvider.GenerateToken(user, UserRoles, permissions);
 
 		// generate refresh token
 		var newRefreshToken = GenerateRefreshToken();
@@ -342,13 +341,13 @@ public class AuthService(
 		await _userManager.UpdateAsync(user);
 
 		// Return Response
-		var response= new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName,
+		var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName,
 			newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
 
 		return Result.Success(response);
 	}
 
-	private async Task<(IEnumerable<string> UserRoles ,IEnumerable<string> permissions )> GetUserRolesAndPermissions(ApplicationUser user, CancellationToken cancellationToken =default)
+	private async Task<(IEnumerable<string> UserRoles, IEnumerable<string> permissions)> GetUserRolesAndPermissions(ApplicationUser user, CancellationToken cancellationToken = default)
 	{
 		var userRoles = await _userManager.GetRolesAsync(user);
 
@@ -370,7 +369,7 @@ public class AuthService(
 		// query syntax is a good way with join
 		var permissions = await (
 				from r in _context.Roles
-				join rc in _context.RoleClaims 
+				join rc in _context.RoleClaims
 				on r.Id equals rc.RoleId
 				where userRoles.Contains(r.Name!)
 				select rc.ClaimValue!)
@@ -379,12 +378,12 @@ public class AuthService(
 
 		return (userRoles, permissions!);
 	}
-		 
+
 	private string GenerateRefreshToken()
 	{
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 	}
-	private async Task SendConfirmationEmail(ApplicationUser user , string code)
+	private async Task SendConfirmationEmail(ApplicationUser user, string code)
 	{
 		// may be requests come from specific url [development , production, testing, etc] and you can add them add appsettings 
 		// but here we choose the difficult way
@@ -400,7 +399,7 @@ public class AuthService(
 				// the path after origin :it's a frontend responsibility => must telling you what is the path after click on the	correct path end user should go on , can send it at headers	  
 				// 2 values which front end need to resend them to me again
 			}
-			) ;
+			);
 
 		//await _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket : Email Confirmation ", emailBody);
 

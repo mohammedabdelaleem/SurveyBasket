@@ -13,7 +13,7 @@ namespace SurveyBasket.API.Services;
 	which is used when sending account confirmation emails, password resets, notifications, etc.
  */
 public class EmailService(
-	IOptions<MailSettings> mailSettings ,
+	IOptions<MailSettings> mailSettings,
 	ILogger<EmailService> logger) : IEmailSender
 {
 	private readonly MailSettings _mailSettings = mailSettings.Value;
@@ -21,7 +21,7 @@ public class EmailService(
 
 	public async Task SendEmailAsync(string email, string subject, string htmlMessage)
 	{
-		var emailMessage = new MimeMessage 
+		var emailMessage = new MimeMessage
 		{
 			Sender = MailboxAddress.Parse(_mailSettings.Mail),
 			Subject = subject,
@@ -46,7 +46,7 @@ public class EmailService(
 
 		_logger.LogInformation("sending email to : {email}", email);
 
-		smtp.Connect(_mailSettings.Host, _mailSettings.Port,SecureSocketOptions.StartTls);
+		smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
 		smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
 		await smtp.SendAsync(emailMessage);
 
