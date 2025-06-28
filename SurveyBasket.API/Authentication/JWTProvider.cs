@@ -22,7 +22,7 @@ public class JWTProvider(IOptions<JWTOptions> jwtOptions) : IJWTProvider
 			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
 			new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
 			new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // prefer to adding with claims ,
+			new Claim(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString()), // prefer to adding with claims ,
 			new Claim(nameof(roles) , JsonSerializer.Serialize(roles), JsonClaimValueTypes.JsonArray),
 			new Claim(nameof(permissions) , JsonSerializer.Serialize(permissions), JsonClaimValueTypes.JsonArray)
 			];
