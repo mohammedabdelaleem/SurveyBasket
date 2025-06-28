@@ -34,8 +34,7 @@ public class NotificationService(
 				.ToListAsync();
 		}
 
-		// TODO: select members only
-		var users = await _userManager.Users.ToListAsync();
+		var users = await _userManager.GetUsersInRoleAsync(DefaultRoles.Member);
 
 
 		// foreach availabel poll we have 
