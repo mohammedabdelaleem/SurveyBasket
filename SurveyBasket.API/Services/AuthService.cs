@@ -247,16 +247,31 @@ public class AuthService(
 		if (await _userManager.FindByEmailAsync(email) is not { } user)
 			return Result.Success();
 
-		if(!user.EmailConfirmed)
-			return Result.Failure(UserErrors.EmailNotConfirmed);
+		#region record powerful feature
+		// NOTE:
+		// The `with` expression is only supported for `record` types in C#.
+		// It allows creating a copy of an existing record with one or more modified properties.
+		// This is useful for immutability and concise updates.
+		//
+		// ⚠️ To use `with`, the type must be declared as a `record`, not a regular class.
+		//
+		// ✅ Example:
+		// public record Error(string Code, string Description, int StatusCode);
+		// var modifiedError = UserErrors.EmailNotConfirmed with { StatusCode = StatusCodes.Status400BadRequest };
+		//
+		// ❌ This will NOT work if `Error` is a class.
+		#endregion
+
+		if (!user.EmailConfirmed) // record has a powerful feature , change specific value from object while taking instance 
+			return Result.Failure(UserErrors.EmailNotConfirmed with { StatusCode=StatusCodes.Status400BadRequest});
 
 
 		// find a user with the incomming email ==>
-		 /*
-		   Generate a token
-				Send it via email(or link)
-				When the user clicks the link, they submit the token along with their new password
-		 */
+		/*
+		  Generate a token
+			   Send it via email(or link)
+			   When the user clicks the link, they submit the token along with their new password
+		*/
 
 		// 01 - Generate Code 
 		var code = await _userManager.GeneratePasswordResetTokenAsync(user);

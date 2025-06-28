@@ -1,7 +1,7 @@
 ﻿
 namespace SurveyBasket.API.Errors;
 
-public static class UserErrors
+public record UserErrors
 {
 	public static readonly Error InvalidCredintials = new Error("User.InvalidCredintials", "Invalid Email Or Password", StatusCodes.Status401Unauthorized);
 
@@ -22,6 +22,5 @@ public static class UserErrors
 	public static readonly Error DuplicatedConfirmation = new Error("User.DuplicatedConfirmation", "Email Already Confirmed", StatusCodes.Status400BadRequest);
 
 
-	public static readonly Error InvalidRoles
-= new Error("User.InvalidRoles", "Invalid Roles", StatusCodes.Status400BadRequest);
+	public static readonly Error InvalidRoles = new Error("User.InvalidRoles", "Invalid Roles", StatusCodes.Status400BadRequest);
 }

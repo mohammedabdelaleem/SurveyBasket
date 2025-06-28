@@ -1,7 +1,7 @@
 ﻿namespace SurveyBasket.API.Errors;
 
 
-public static class VoteErrors
+public record VoteErrors
 {
 
 	public static readonly Error PollNotFound 

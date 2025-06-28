@@ -1,7 +1,7 @@
 ﻿namespace SurveyBasket.API.Errors;
 
 
-public static class QuestionErrors
+public record QuestionErrors
 {
 
 	public static readonly Error QuestionNotFound
