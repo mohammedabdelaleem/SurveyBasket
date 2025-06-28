@@ -13,6 +13,7 @@ using System.Threading.RateLimiting;
 using Asp.Versioning;
 using SurveyBasket.API.OpenApiTransformers;
 using Asp.Versioning.ApiExplorer;
+using MailKit;
 
 namespace SurveyBasket.API;
 
@@ -50,7 +51,6 @@ public static class DependencyInjection
 
 
 		services
-			//.AddSwaggerConfig()
 			.AddMappsterrConfig()
 			.AddFluentValidationConfig()
 			.AddDataBaseConfig(configuration);
@@ -74,8 +74,11 @@ public static class DependencyInjection
 
 		services.AddHttpContextAccessor();
 
-		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings))); // as we know after this ---> we can inject for this class using IOption Interface i can read the data inside appsettings | user secret file  
 
+		services.AddOptions<MailSettings>()
+			.BindConfiguration(nameof(MailSettings))
+			.ValidateDataAnnotations()
+			.ValidateOnStart();
 
 		services.AddHealthChecks()
 			.AddSqlServer(name: "Database", connectionString: constr)
