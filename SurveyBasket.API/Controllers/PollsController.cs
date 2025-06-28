@@ -158,7 +158,7 @@ public class PollsController : ControllerBase
 
 
 
-	[HttpPut("{id}/togglePublish")]
+	[HttpPut("{id}/toggle-publish")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[HasPermission(Permissions.UpdatePoll)]

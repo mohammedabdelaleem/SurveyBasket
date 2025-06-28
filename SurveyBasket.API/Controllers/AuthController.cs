@@ -109,13 +109,4 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 
 
 
-	[HttpGet("test")]
-	[EnableRateLimiting(RateLimiterInfo.ConcurrenncyPolicy)] 
-	public IActionResult Test()
-	{
-		Thread.Sleep(6000);
-		return Ok();
-	}
-
-
 }
