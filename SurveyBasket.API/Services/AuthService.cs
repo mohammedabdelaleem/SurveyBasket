@@ -92,7 +92,7 @@ public class AuthService(
 
 
 		var user = request.Adapt<ApplicationUser>();
-		//user.Email = request.Email;	// Adding newConfiguration Mapping
+		//user.UserName = request.Email;	// Adding newConfiguration Mapping
 
 		var result = await _userManager.CreateAsync(user, request.Password);
 
@@ -311,8 +311,6 @@ public class AuthService(
 		var error = result.Errors.First();
 		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));
 	}
-
-
 
 
 	private async Task<Result<AuthResponse>> HandleAuthResponse(ApplicationUser user, CancellationToken cancellationToken = default)

@@ -7,7 +7,7 @@ public class VoteRequestValidator : AbstractValidator<VoteRequest>
 		RuleFor(x => x.Answers)
 			.NotEmpty();
 
-
+		// you need to append validation for children at parent
 		RuleForEach(x => x.Answers)
 			.SetInheritanceValidator(x => x.Add(new VoteAnswerRequestValidator()));
 	}
